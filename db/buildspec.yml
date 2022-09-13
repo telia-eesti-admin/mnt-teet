@@ -1,0 +1,33 @@
+version: 0.2
+
+env:
+  variables:
+    IMAGE_REPO_NAME: "teet-db-migrate"
+    IMAGE_TAG: "latest"
+    AWS_DEFAULT_REGION: "eu-central-1"
+    ECS_TASK_NAME: "teet-db-migrate"
+
+  parameter-store:
+    AWS_ACCOUNT_ID: "/teet/aws-account-id"
+
+phases:
+  install:
+    runtime-versions:
+      java: corretto11
+    commands:
+      - echo Download Clojure CLI tool
+      - curl -O https://download.clojure.org/install/linux-install-1.10.1.466.sh
+      - bash linux-install-1.10.1.466.sh
+  pre_build:
+    commands:
+      - $(aws ecr get-login-password --no-include-email --region $AWS_DEFAULT_REGION)
+  build:
+    commands:
+      - cd db
+      - bash build.bash
+  post_build:
+   commands:
+     - cd ..
+     - printf '[{"name":"%s","imageUri":"%s"}]' $ECS_TASK_NAME $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG > db.imagedefinitions.json
+artifacts:
+   files: db.imagedefinitions.json

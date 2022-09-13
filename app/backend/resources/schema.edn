@@ -1,0 +1,2288 @@
+[{:db/ident :migration/baseline-2020
+  :txes [
+         ;; Transaction metadata
+         [{:db/ident :tx/author
+           :db/valueType :db.type/uuid
+           :db/cardinality :db.cardinality/one
+           :db/doc "Id of the user who made this transaction"}
+          {:db/ident :integration/source-uri
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one
+           :db/doc "URI of data imported by integration transaction"}]
+
+         ;; enumerations
+         [{:db/ident :enum/attribute
+           :db/doc "Correlates different enum values by keyword"
+           :db/valueType :db.type/keyword
+           :db/cardinality :db.cardinality/one}
+          {:db/ident :enum/valid-for
+           :db/valueType :db.type/keyword
+           :db/cardinality :db.cardinality/one
+           :db/doc "Indicates for which parent value this selection is valid for"}]
+
+         ;; common metadata fields
+         [{:db/ident :meta/creator
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one
+           :db/doc "Original creator of entity"}
+          {:db/ident :meta/created-at
+           :db/valueType :db.type/instant
+           :db/cardinality :db.cardinality/one
+           :db/doc "Timestamp of creation"}
+          {:db/ident :meta/modified-at
+           :db/valueType :db.type/instant
+           :db/cardinality :db.cardinality/one
+           :db/doc "Timestamp of last modification"}
+          {:db/ident :meta/modifier
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one
+           :db/doc "Ref to user entity who last modified"}
+          {:db/ident :meta/deleted?
+           :db/valueType :db.type/boolean
+           :db/cardinality :db.cardinality/one
+           :db/doc "If true this entity will not be shown in UI except for special admin functionality."}]
+
+         ;; user
+         [{:db/ident :user/id
+           :db/doc "UUID of user information. Links to external source."
+           :db/valueType :db.type/uuid
+           :db/cardinality :db.cardinality/one
+           :db/unique :db.unique/identity}
+          {:db/ident :user/roles
+           :db/valueType :db.type/keyword
+           :db/cardinality :db.cardinality/many
+           :db/doc "User roles"}
+          {:db/ident :user/given-name
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one
+           :db/doc "User's given name"}
+          {:db/ident :user/family-name
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one
+           :db/doc "User's family name"}
+          {:db/ident :user/email
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one
+           :db/doc "User's email address"}
+          {:db/ident :user/person-id
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one
+           :db/doc "User's Estonian person ID"
+           :db/unique :db.unique/identity}
+          {:db/ident :user/permissions
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/many
+           :db/doc "Permissions that have been granted to this user"}]
+
+         ;; permission
+         [{:db/ident :permission/role
+           :db/valueType :db.type/keyword
+           :db/cardinality :db.cardinality/one
+           :db/doc "The role of this permission, like. :admin"}
+
+          {:db/ident :permission/scopes
+           :db/valueType :db.type/keyword
+           :db/cardinality :db.cardinality/many
+           :db/doc "Scopes (sections of functionality) this permission is applicable in (empty for all)"}
+
+          {:db/ident :permission/projects
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/many
+           :db/doc "Projects this permission is applies to (empty for global)"}
+
+          {:db/ident :permission/valid-from
+           :db/valueType :db.type/instant
+           :db/cardinality :db.cardinality/one
+           :db/doc "Earliest time when this permission is valid"}
+
+          {:db/ident :permission/valid-until
+           :db/valueType :db.type/instant
+           :db/cardinality :db.cardinality/one
+           :db/doc "Last time this permission is valid, indefinite if not specified."}]
+
+         ;; THK project
+         [{:db/ident       :thk.project/id
+           :db/valueType   :db.type/string
+           :db/cardinality :db.cardinality/one
+           :db/doc         "THK project id"
+           :db/unique      :db.unique/identity}
+          {:db/ident :thk.project/name
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one}
+          {:db/ident :thk.project/road-nr
+           :db/valueType :db.type/long
+           :db/cardinality :db.cardinality/one}
+          {:db/ident :thk.project/bridge-nr
+           :db/valueType :db.type/long
+           :db/cardinality :db.cardinality/one}
+          {:db/ident :thk.project/end-m
+           :db/valueType :db.type/long
+           :db/cardinality :db.cardinality/one}
+          {:db/ident :thk.project/start-m
+           :db/valueType :db.type/long
+           :db/cardinality :db.cardinality/one}
+          {:db/ident :thk.project/carriageway
+           :db/valueType :db.type/long
+           :db/cardinality :db.cardinality/one}
+          {:db/ident :thk.project/estimated-start-date
+           :db/valueType :db.type/instant
+           :db/cardinality :db.cardinality/one}
+          {:db/ident :thk.project/estimated-end-date
+           :db/valueType :db.type/instant
+           :db/cardinality :db.cardinality/one}
+          {:db/ident :thk.project/procurement-nr
+           :db/valueType :db.type/string
+           :db/doc "Procurement.ProcurementNo. Can contain text"
+           :db/cardinality :db.cardinality/one}
+          {:db/ident :thk.project/procurement-id
+           :db/valueType :db.type/long
+           :db/doc  "Procurement.ID/hanke_id"
+           :db/cardinality :db.cardinality/one}
+          {:db/ident :thk.project/project-name
+           :db/cardinality :db.cardinality/one
+           :db/valueType   :db.type/string
+           :db/doc         "Custom name given to project in project initialization"}
+
+          {:db/ident       :thk.project/owner
+           :db/cardinality :db.cardinality/one
+           :db/valueType   :db.type/ref
+           :db/doc         "User who owns this project"}
+          {:db/ident :thk.project/lifecycles
+           :db/cardinality :db.cardinality/many
+           :db/valueType :db.type/ref
+           :db/doc "Lifecycles in this project"}
+
+          {:db/ident       :thk.project/manager
+           :db/cardinality :db.cardinality/one
+           :db/valueType   :db.type/ref
+           :db/doc         "User who manages this project"}
+          {:db/ident :thk.project/m-range-change-reason
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one}
+          {:db/ident :thk.project/custom-end-m
+           :db/valueType :db.type/long
+           :db/cardinality :db.cardinality/one}
+          {:db/ident :thk.project/custom-start-m
+           :db/valueType :db.type/long
+           :db/cardinality :db.cardinality/one}
+          {:db/ident       :thk.project/related-restrictions
+           :db/valueType   :db.type/string
+           :db/cardinality :db.cardinality/many
+           :db/doc         "Restrictions related to the THK project"}
+          {:db/ident       :thk.project/related-cadastral-units
+           :db/valueType   :db.type/string
+           :db/cardinality :db.cardinality/many
+           :db/doc         "Cadastral units related to the THK project"}
+
+          {:db/ident :thk.project/integration-info
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one
+           :db/doc "EDN key/value map of THK information in CSV that TEET does not use. Needed for passing back to THK."}
+          {:db/ident :thk.project/region-name
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one
+           :db/doc "Name of the region this project is located in"}
+          {:db/ident :thk.project/repair-method
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one
+           :db/doc "Project repair method as shown in THK csv."}]
+
+         ;; THK lifecycle
+         [{:db/ident       :thk.lifecycle/estimated-start-date
+           :db/cardinality :db.cardinality/one
+           :db/valueType   :db.type/instant
+           :db/doc         "Estimated start date for lifecycle"}
+          {:db/ident       :thk.lifecycle/estimated-end-date
+           :db/cardinality :db.cardinality/one
+           :db/valueType   :db.type/instant
+           :db/doc         "Estimated end date for lifecycle"}
+          {:db/ident       :thk.lifecycle/activities
+           :db/cardinality :db.cardinality/many
+           :db/valueType   :db.type/ref
+           :db/doc         "Activies performed in this lifecycle"}
+          {:db/ident       :thk.lifecycle/type
+           :db/cardinality :db.cardinality/one
+           :db/valueType   :db.type/ref
+           :db/doc         "Type of the lifecycle. f.ex Construction/Design"}
+          {:db/ident :thk.lifecycle/id
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one
+           :db/unique :db.unique/identity}
+          {:db/ident :thk.lifecycle/integration-info
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one
+           :db/doc "EDN key/value map of THK information in CSV that TEET does not use. Needed for passing back to THK."}]
+
+         ;; Activity
+         [{:db/ident       :activity/estimated-start-date
+           :db/valueType   :db.type/instant
+           :db/cardinality :db.cardinality/one}
+
+          {:db/ident       :activity/estimated-end-date
+           :db/valueType   :db.type/instant
+           :db/cardinality :db.cardinality/one}
+
+          {:db/ident       :activity/actual-start-date
+           :db/valueType   :db.type/instant
+           :db/cardinality :db.cardinality/one}
+
+          {:db/ident       :activity/actual-end-date
+           :db/valueType   :db.type/instant
+           :db/cardinality :db.cardinality/one}
+
+          {:db/ident       :activity/tasks
+           :db/valueType   :db.type/ref
+           :db/cardinality :db.cardinality/many}
+          {:db/ident       :activity/name
+           :db/valueType   :db.type/ref
+           :db/cardinality :db.cardinality/one
+           :db/doc         "Activity name enum ref"}
+          {:db/ident       :activity/status
+           :db/valueType   :db.type/ref
+           :db/cardinality :db.cardinality/one
+           :db/doc         "Activity status enum ref"}
+          {:db/ident :activity/integration-info
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one
+           :db/doc "EDN key/value map of THK information in CSV that TEET does not use. Needed for passing back to THK."}
+          {:db/ident :thk.activity/id
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one
+           :db/unique :db.unique/identity
+           :db/doc "Unique activity id in THK"}]
+
+         ;; Task
+         [{:db/ident :task/name
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one}
+          {:db/ident :task/type
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one
+           :db/doc "Task type enum ref"}
+          {:db/ident :task/description
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one}
+          {:db/ident :task/assignee
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one}
+          {:db/ident :task/status
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one}
+          {:db/ident :task/comments
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/many
+           :db/doc "Comments for the task"}
+          {:db/ident :task/group
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one
+           :db/doc "Task group enum ref"}
+          {:db/ident :task/files
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/many
+           :db/doc "File results for this task"}
+          {:db/ident :task/estimated-start-date
+           :db/valueType :db.type/instant
+           :db/cardinality :db.cardinality/one}
+          {:db/ident :task/estimated-end-date
+           :db/valueType :db.type/instant
+           :db/cardinality :db.cardinality/one}
+          {:db/ident :task/actual-start-date
+           :db/valueType :db.type/instant
+           :db/cardinality :db.cardinality/one}
+          {:db/ident :task/actual-end-date
+           :db/valueType :db.type/instant
+           :db/cardinality :db.cardinality/one}
+          {:db/ident :task/send-to-thk?
+           :db/valueType :db.type/boolean
+           :db/cardinality :db.cardinality/one
+           :db/doc "If true, send this task to THK. Task type must have THK task type mapped."}]
+
+         ;; File
+         [{:db/ident :file/name
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one
+           :db/doc "Name of the file"}
+
+          {:db/ident :file/size
+           :db/valueType :db.type/long
+           :db/cardinality :db.cardinality/one
+           :db/doc "Size of the file in bytes"}
+
+          {:db/ident :file/type
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one
+           :db/doc "MIME type of the file"}
+          {:db/ident :file/comments
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/many
+           :db/doc "Comments for the file"}
+          {:db/ident :file/status
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one
+           :db/doc "Reference to file status"}
+          {:db/ident :file/version
+           :db/valueType :db.type/long
+           :db/cardinality :db.cardinality/one
+           :db/doc "Version of this file, ordinal number"}
+
+          {:db/ident :file/number
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one
+           :db/doc "User specified file number per project (may be number or string), not unique"}
+
+          {:db/ident :file/previous-version
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one
+           :db/doc "Reference to the previous version of this file that this file supersedes."}
+          {:db/ident :file/group-number
+           :db/valueType :db.type/long
+           :db/cardinality :db.cardinality/one
+           :db/doc "File group number from name metadata"}
+          ]
+
+         ;; Comment
+         [{:db/ident :comment/comment
+           :db/doc "Text of the comment"
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one}
+          {:db/ident :comment/author
+           :db/doc "Author of the comment"
+           :db/cardinality :db.cardinality/one
+           :db/valueType :db.type/ref}
+          {:db/ident :comment/timestamp
+           :db/doc "When to comment was made"
+           :db/cardinality :db.cardinality/one
+           :db/valueType :db.type/instant}
+          {:db/ident :comment/files
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/many
+           :db/doc "Image files attached to a comment"}
+          {:db/ident :comment/visibility
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one
+           :db/doc "Indicator of special visibility, is the comment visible only internally or for external consultants as well"}
+          {:db/ident :comment/status
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one
+           :db/doc "Status of the comment, unresolved/resolved/untracked"}]
+
+         ;; Land acquisition
+         [{:db/ident :land-acquisition/project
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one
+           :db/doc "The project in which this land acquisition decision is made in"}
+          {:db/ident :land-acquisition/cadastral-unit
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one
+           :db/doc "TEET ID of the cadastral unit"}
+          {:db/ident :land-acquisition/impact
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one}
+
+          {:db/ident :land-acquisition.impact/undecided
+           :enum/attribute :land-acquisition/impact}
+          {:db/ident :land-acquisition.impact/purchase-needed
+           :enum/attribute :land-acquisition/impact}
+          {:db/ident :land-acquisition.impact/purchase-not-needed
+           :enum/attribute :land-acquisition/impact}
+
+          {:db/ident :land-acquisition/pos-number
+           :db/valueType :db.type/long
+           :db/cardinality :db.cardinality/one
+           :db/doc "Used to track land purchase process."}
+
+          {:db/ident :land-acquisition/area-to-obtain
+           :db/cardinality :db.cardinality/one
+           :db/valueType :db.type/long}]
+
+         ;; notification
+         [{:db/ident :notification/type
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one
+           :db/doc "Type of notification, references :notification.type/* enum values"}
+          {:db/ident :notification/receiver
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one
+           :db/doc "Reference to the user who receives this notification"}
+          {:db/ident :notification/target
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one
+           :db/doc "Reference to the target of the action that caused the notification, e.g. project, lifecycle, task, etc."}
+          {:db/ident :notification/status
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one
+           :db/doc "Status of the notification, references :notification.status/* enum values"}
+          ;; Notification status types
+          {:db/ident :notification.status/unread
+           :enum/attribute :notification/status}
+          {:db/ident :notification.status/acknowledged}]
+
+
+
+         ;; THK task type & codes
+         [{:db/ident :thk/task-type
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one
+           :db/doc "The THK type associated of a task when sending to THK. Tasks without this attribute are not sent."}
+
+          {:db/ident :thk/code
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one
+           :db/doc "The code value in THK for the selection, used for mapping in CSV"}
+
+          {:db/ident :filename/code
+           :db/doc "Short code in filename that is mapped to this enum value"
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one}]
+
+         ;; Create the THK task types
+         [{:db/ident :thk.task-type/design-requirements :thk/code "4014"}
+          {:db/ident :thk.task-type/study :thk/code "4001"}
+          {:db/ident :thk.task-type/environmental-impact-assessment :thk/code "4002"}
+          {:db/ident :thk.task-type/third-party-review :thk/code "4010"}
+          {:db/ident :thk.task-type/road-safety-audit :thk/code "4011"}
+          {:db/ident :thk.task-type/building-permit :thk/code "4015"}]
+
+         ;; enumeration values
+         [ ;; lifecycle types
+          {:db/ident :thk.lifecycle-type/design :enum/attribute :thk.lifecycle/type}
+          {:db/ident :thk.lifecycle-type/construction :enum/attribute :thk.lifecycle/type}
+          {:db/ident :thk.lifecycle-type/maintenance :enum/attribute :thk.lifecycle/type}
+
+          ;; activity names
+          {:db/ident :activity.name/pre-design,
+           :enum/attribute :activity/name,
+           :enum/valid-for :thk.lifecycle-type/design,
+           :filename/code "ES"}
+          {:db/ident :activity.name/construction,
+           :enum/attribute :activity/name,
+           :filename/code "EH"}
+          {:db/ident :activity.name/detailed-design,
+           :enum/attribute :activity/name,
+           :enum/valid-for :thk.lifecycle-type/design,
+           :filename/code "PP"}
+          {:db/ident :activity.name/preliminary-design,
+           :enum/attribute :activity/name,
+           :enum/valid-for :thk.lifecycle-type/design,
+           :filename/code "EP"}
+          {:db/ident :activity.name/land-acquisition,
+           :enum/attribute :activity/name,
+           :enum/valid-for :thk.lifecycle-type/design,
+           :filename/code "MO"}
+          {:db/ident :activity.name/workshop-design,
+           :enum/attribute :activity/name,
+           :enum/valid-for :thk.lifecycle-type/construction,
+           :filename/code "TP"}
+
+          ;; activity status
+          {:db/ident :activity.status/in-preparation :enum/attribute :activity/status}
+          {:db/ident :activity.status/not-started :enum/attribute :activity/status}
+          {:db/ident :activity.status/in-progress :enum/attribute :activity/status}
+          {:db/ident :activity.status/in-review :enum/attribute :activity/status}
+          {:db/ident :activity.status/completed :enum/attribute :activity/status}
+          {:db/ident :activity.status/archived :enum/attribute :activity/status}
+          {:db/ident :activity.status/canceled :enum/attribute :activity/status}
+
+          ;; task types
+          {:db/ident :task.type/road,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/design,
+           :filename/code "TL"}
+          {:db/ident :task.type/feasibility-study,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/study,
+           :thk/task-type :thk.task-type/study,
+           :filename/code "TU"}
+          {:db/ident :task.type/plot-allocation-plan,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/land-purchase,
+           :filename/code "KY"}
+          {:db/ident :task.type/drainage,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/design,
+           :filename/code "DR"}
+          {:db/ident :task.type/eia-pre-assessment,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/study,
+           :thk/task-type :thk.task-type/environmental-impact-assessment,
+           :filename/code "KE"}
+          {:db/ident :task.type/archeological-study,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/study,
+           :thk/task-type :thk.task-type/study,
+           :filename/code "AU"}
+          {:db/ident :task.type/traffic-study,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/study,
+           :thk/task-type :thk.task-type/study,
+           :filename/code "LU"}
+          {:db/ident :task.type/cadastral-works,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/land-purchase,
+           :filename/code "MK"}
+          {:db/ident :task.type/other-facilities,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/design,
+           :filename/code "MR"}
+          {:db/ident :task.type/design-road-safety-audit,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/design-approval,
+           :thk/task-type :thk.task-type/road-safety-audit,
+           :filename/code "LA"}
+          {:db/ident :task.type/state-estate-registry,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/land-purchase,
+           :filename/code "RK"}
+          {:db/ident :task.type/environmental-impact-assessment,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/study,
+           :thk/task-type :thk.task-type/environmental-impact-assessment,
+           :filename/code "KH"}
+          {:db/ident :task.type/design-requirements,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/base-data,
+           :thk/task-type :thk.task-type/design-requirements,
+           :filename/code "PT"}
+          {:db/ident :task.type/terms-of-reference,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/base-data,
+           :filename/code "LY"}
+          {:db/ident :task.type/equipment,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/design,
+           :filename/code "EQ"}
+          {:db/ident :task.type/calculation,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/design-reports,
+           :filename/code "CC"}
+          {:db/ident :task.type/third-party-review,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/design-approval,
+           :thk/task-type :thk.task-type/third-party-review,
+           :filename/code "EK"}
+          {:db/ident :task.type/utilities,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/design,
+           :filename/code "TV"}
+          {:db/ident :task.type/technical-conditions,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/base-data,
+           :filename/code "TT"}
+          {:db/ident :task.type/buildings,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/design}
+          {:db/ident :task.type/property-valuation,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/land-purchase,
+           :filename/code "MH"}
+          {:db/ident :task.type/preliminary-agreements,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/land-purchase,
+           :filename/code "PA"}
+          {:db/ident :task.type/landscaping,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/design,
+           :filename/code "MA"}
+          {:db/ident :task.type/no-objection-coordination,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/design-approval,
+           :filename/code "KK"}
+          {:db/ident :task.type/funding-plan,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/design-reports,
+           :filename/code "RK"}
+          {:db/ident :task.type/structures,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/design,
+           :filename/code "TS"}
+          {:db/ident :task.type/railroad,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/design,
+           :filename/code "TR"}
+          {:db/ident :task.type/building-permit,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/design-approval,
+           :thk/task-type :thk.task-type/building-permit,
+           :filename/code "BP"}
+          {:db/ident :task.type/noise-study,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/study,
+           :thk/task-type :thk.task-type/study,
+           :filename/code "MU"}
+          {:db/ident :task.type/calculation-of-pavement,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/design-reports,
+           :filename/code "KA"}
+          {:db/ident :task.type/general-part,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/base-data,
+           :filename/code "AA"}
+          {:db/ident :task.type/data,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/base-data,
+           :filename/code "LA"}
+          {:db/ident :task.type/acceptances,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/design-approval}
+          {:db/ident :task.type/land-owners,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/design-approval,
+           :filename/code "MO"}
+          {:db/ident :task.type/geological-study,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/study,
+           :thk/task-type :thk.task-type/study,
+           :filename/code "GL"}
+          {:db/ident :task.type/allotment-plan,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/land-purchase}
+          {:db/ident :task.type/topogeodesy,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/study,
+           :thk/task-type :thk.task-type/study,
+           :filename/code "GD"}
+          {:db/ident :task.type/cleanup,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/land-purchase}
+          {:db/ident :task.type/cost-list,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/design-reports,
+           :filename/code "CL"}
+          {:db/ident :task.type/purchase-agreements,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/land-purchase,
+           :filename/code "LS"}
+          {:db/ident :task.type/flora-and-fauna-study,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/study,
+           :thk/task-type :thk.task-type/study,
+           :filename/code "FU"}
+          {:db/ident :task.type/site-plan,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/base-data,
+           :filename/code "AS"}
+          {:db/ident :task.type/other,
+           :enum/attribute :task/type,
+           :thk/task-type :thk.task-type/study,
+           :filename/code "ZZ"}
+          {:db/ident :task.type/lighting,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/design,
+           :filename/code "EL"}
+
+          ;; task status
+          {:db/ident :task.status/not-started :enum/attribute :task/status}
+          {:db/ident :task.status/in-progress :enum/attribute :task/status}
+          {:db/ident :task.status/waiting-for-review :enum/attribute :task/status}
+          {:db/ident :task.status/reviewing :enum/attribute :task/status}
+          {:db/ident :task.status/completed :enum/attribute :task/status}
+
+          ;; task groups
+          {:db/ident :task.group/base-data :enum/attribute :task/group}
+          {:db/ident :task.group/land-purchase :enum/attribute :task/group}
+          {:db/ident :task.group/design-reports :enum/attribute :task/group}
+          {:db/ident :task.group/study :enum/attribute :task/group}
+          {:db/ident :task.group/design :enum/attribute :task/group}
+          {:db/ident :task.group/design-approval :enum/attribute :task/group}
+
+          ;; file status
+          {:db/ident :file.status/draft :enum/attribute :file/status}
+          {:db/ident :file.status/final :enum/attribute :file/status}
+
+          ;; comment visibility
+          {:db/ident :comment.visibility/all :enum/attribute :comment/visibility}
+          {:db/ident :comment.visibility/internal :enum/attribute :comment/visibility}
+          ;; comment status
+          {:db/ident :comment.status/unresolved :enum/attribute :comment/status}
+          {:db/ident :comment.status/resolved :enum/attribute :comment/status}
+          {:db/ident :comment.status/untracked :enum/attribute :comment/status}
+
+          ;; notification types
+          {:db/ident :notification.type/task-review-rejected :enum/attribute :notification/type}
+          {:db/ident :notification.type/activity-rejected :enum/attribute :notification/type}
+          {:db/ident :notification.type/task-waiting-for-review :enum/attribute :notification/type}
+          {:db/ident :notification.type/activity-accepted :enum/attribute :notification/type}
+          {:db/ident :notification.type/comment-created :enum/attribute :notification/type}
+          {:db/ident :notification.type/project-manager-assigned :enum/attribute :notification/type}
+          {:db/ident :notification.type/task-assigned :enum/attribute :notification/type}]]}
+
+ {:db/ident :migration/comment-status-notifications
+  :txes [[{:db/ident :notification.type/comment-resolved :enum/attribute :notification/type}
+          {:db/ident :notification.type/comment-unresolved :enum/attribute :notification/type}]]}
+
+ {:db/ident :migration/activity-waiting-notification
+  :txes [[{:db/ident :notification.type/activity-waiting-for-review :enum/attribute :notification/type}]]}
+
+ {:db/ident :migration/estate-procedure
+  :txes [[{:db/ident :estate-procedure/type
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one}
+          ;; types of procedures
+          {:db/ident :estate-procedure.type/urgent
+           :enum/attribute :estate-procedure/type}
+          {:db/ident :estate-procedure.type/expropriation
+           :enum/attribute :estate-procedure/type}
+          {:db/ident :estate-procedure.type/property-trading
+           :enum/attribute :estate-procedure/type}
+          {:db/ident :estate-procedure.type/acquisition-negotiation
+           :enum/attribute :estate-procedure/type}
+          {:db/ident :estate-procedure.type/property-rights
+           :enum/attribute :estate-procedure/type}
+
+          {:db/ident :estate-procedure/pos
+           :db/valueType :db.type/long
+           :db/cardinality :db.cardinality/one}
+          {:db/ident :estate-procedure/urgent-bonus
+           :db/valueType :db.type/bigdec
+           :db/cardinality :db.cardinality/one}
+          {:db/ident :estate-procedure/motivation-bonus
+           :db/valueType :db.type/bigdec
+           :db/cardinality :db.cardinality/one}
+          {:db/doc "Refers to estate-compensation entities"
+           :db/ident :estate-procedure/third-party-compensations
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/many}
+
+          ;; estate compensation
+          {:db/ident :estate-compensation/description
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one}
+          {:db/ident :estate-compensation/reason
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one}
+          {:db/ident :estate-compensation/amount
+           :db/valueType :db.type/bigdec
+           :db/cardinality :db.cardinality/one}
+
+          {:db/ident :estate-compensation.reason/increase-of-journey
+           :enum/attribute :estate-compensation/reason}
+          {:db/ident :estate-compensation.reason/road-area
+           :enum/attribute :estate-compensation/reason}
+          {:db/ident :estate-compensation.reason/forest
+           :enum/attribute :estate-compensation/reason}
+          {:db/ident :estate-compensation.reason/loss-of-living-space
+           :enum/attribute :estate-compensation/reason}
+          {:db/ident :estate-compensation.reason/crops
+           :enum/attribute :estate-compensation/reason}
+          {:db/ident :estate-compensation.reason/premature-ending-of-agricultural-agreement
+           :enum/attribute :estate-compensation/reason}
+          {:db/ident :estate-compensation.reason/other
+           :enum/attribute :estate-compensation/reason}]]}
+
+ ;; TEET-539 Retract acceptances as a duplicate to No-objection co-ordination
+ {:db/ident :migration/retract-acceptances
+  :txes [[[:db/retractEntity [:db/ident :task.type/acceptances]]]]}
+
+ {:db/ident :migration/estate-procedure2
+  :txes [[{:db/doc "Refers to land-exchange entities"
+           :db/ident :estate-procedure/land-exchanges
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/many}
+
+          ;; Land exchange entity
+          {:db/ident :land-exchange/cadastral-unit-id
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one}
+          {:db/ident :land-exchange/area
+           :db/valueType :db.type/bigdec
+           :db/cardinality :db.cardinality/one}
+          {:db/ident :land-exchange/price-per-sqm
+           :db/valueType :db.type/bigdec
+           :db/cardinality :db.cardinality/one}]
+         ;changes to the estate-procedure entity
+         [{:db/doc "Refers to estate-compensation entities"
+           :db/ident :estate-procedure/compensations
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/many}
+          {:db/ident :estate-procedure/project
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one
+           :db/doc "The project in which this estate procedure is made in"}
+          {:db/ident :estate-procedure/estate-id
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one
+           :db/doc "Estate id to which the procedure is made for"}
+          ]]}
+
+ {:db/ident :migration/estate-procedure3
+  :txes [[{:db/doc "Process fees payed out in land procedure"
+           :db/ident :estate-procedure/process-fees
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/many}
+
+          {:db/ident :estate-process-fee/recipient
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one
+           :db/doc "Name of the fee recipient"}
+
+          {:db/ident :estate-process-fee/person-id
+           :db/cardinality :db.cardinality/one
+           :db/valueType :db.type/string
+           :db/doc "Person ID of fee recipient (if owner is physical person)"}
+          {:db/ident :estate-process-fee/business-id
+           :db/cardinality :db.cardinality/one
+           :db/valueType :db.type/string
+           :db/doc "Business ID of the fee recipient (if owner is legal person)"}
+          {:db/ident :estate-process-fee/fee
+           :db/cardinality :db.cardinality/one
+           :db/valueType :db.type/bigdec
+           :db/doc "Fee amount (€)"}]]}
+
+ {:db/ident :migration/notification-project
+  :txes [[{:db/ident :notification/project
+           :db/doc "Project this notification is about (if any)"
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one}]]}
+
+ {:db/ident :migration/land-form-unique
+  :txes [[{:db/ident :land-acquisition/project+cadastral-unit
+           :db/valueType :db.type/tuple
+           :db/tupleAttrs [:land-acquisition/project :land-acquisition/cadastral-unit]
+           :db/cardinality :db.cardinality/one
+           :db/unique :db.unique/identity
+           :db/doc "Ensure there is only one land acqusition form per project and cadastral unit"}
+
+          {:db/ident :estate-procedure/project+estate-id
+           :db/valueType :db.type/tuple
+           :db/tupleAttrs [:estate-procedure/project :estate-procedure/estate-id]
+           :db/cardinality :db.cardinality/one
+           :db/unique :db.unique/identity
+           :db/doc "Ensure there is only one estate procedure form per project and estate id"}]]}
+
+ {:db/ident :migration/repair-method-is-group-short-name
+  :txes [teet.migration.project-repair-method/fix-repair-method]}
+
+ {:db/ident :migration/land-acquisition-status
+  :txes [[{:db/ident :land-acquisition/status
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one}
+          {:db/ident :land-acquisition.status/in-progress
+           :enum/attribute :land-acquisition/status}
+          {:db/ident :land-acquisition.status/in-progress-problematic
+           :enum/attribute :land-acquisition/status}
+          {:db/ident :land-acquisition.status/in-progress-ready
+           :enum/attribute :land-acquisition/status}
+          {:db/ident :land-acquisition.status/completed
+           :enum/attribute :land-acquisition/status}]]}
+
+ {:db/ident :migration/comment-mentions
+  :txes [[{:db/ident :comment/mentions
+           :db/doc "Refers to users that need to be notified of this comment"
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/many}
+          {:db/ident :notification.type/comment-mention :enum/attribute :notification/type}]]}
+
+ {:db/ident :migration/update-task-type-information
+  :txes [[;; Study
+          {:db/ident :task.type/study-other
+           :enum/attribute :task/type
+           :enum/valid-for :task.group/study
+           :thk/task-type :thk.task-type/study
+           :filename/code "ZZ"}
+          {:db/ident :task.type/data
+           :filename/code "AD"}
+
+          ;; Design
+          [:db/retractEntity [:db/ident :task.type/buildings]]
+
+          ;; Land acquisition
+          {:db/ident :task.type/state-estate-registry :filename/code "RR"}
+          [:db/retractEntity [:db/ident :task.type/cleanup]]
+          [:db/retractEntity [:db/ident :task.type/allotment-plan]]]]}
+
+ {:db/ident :migration/land-acquisition-price
+  :txes [[{:db/ident :land-acquisition/price-per-sqm
+           :db/valueType :db.type/bigdec
+           :db/cardinality :db.cardinality/one}
+          {:db/ident :land-acquisition/registry-number
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one}]]}
+
+ {:db/ident :migration/activity-procurement
+  :txes [[{:db/ident :activity/procurement-nr
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one}
+          {:db/ident :activity/procurement-id
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one}]
+         teet.migration.activity-procurement-info/extract-procurement-info-from-integration-info]}
+
+ {:db/ident :migration/notification-email-sent
+  :txes [[{:db/ident :notification/email-sent-at
+           :db/valueType :db.type/instant
+           :db/cardinality :db.cardinality/one
+           :db/doc "Timestamp of when email was sent. If missing, no email has been sent."}]]}
+
+ {:db/ident :migration/land-acquisition-estate-id
+  :txes [[{:db/doc "ID of the estate that contains the plot for which the acquisition is made."
+           :db/ident :land-acquisition/estate-id
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one}]]}
+
+ {:db/ident :migration/owner-and-estate-comments
+  :txes [[{:db/doc "Reference to the project for which the estate-comments entity exists"
+           :db/ident :estate-comments/project
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one}
+          {:db/doc "Estate-id to which the comments exist"
+           :db/ident :estate-comments/estate-id
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one}
+          {:db/ident :estate-comments/comments
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/many}
+          {:db/ident :estate-comments/project+estate-id
+           :db/valueType :db.type/tuple
+           :db/tupleAttrs [:estate-comments/project :estate-comments/estate-id]
+           :db/cardinality :db.cardinality/one
+           :db/unique :db.unique/identity
+           :db/doc "Ensure there is only one estate-comments for an estate per project"}
+          {:db/doc "Reference to the project for which the owner-comments entity exists"
+           :db/ident :owner-comments/project
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one}
+          {:db/doc "Id for a single owner of an estate"
+           :db/ident :owner-comments/owner-id
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one}
+          {:db/ident :owner-comments/comments
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/many}
+          {:db/ident :owner-comments/project+owner-id
+           :db/valueType :db.type/tuple
+           :db/tupleAttrs [:owner-comments/project :owner-comments/owner-id]
+           :db/cardinality :db.cardinality/one
+           :db/unique :db.unique/identity
+           :db/doc "Ensure there is only one owner-comments for an owner per project"}]]}
+
+ {:db/ident :migration/file-pos-number
+  :txes [[{:db/ident :file/pos-number
+           :db/valueType :db.type/long
+           :db/cardinality :db.cardinality/one
+           :db/doc "Land pos# this file relates to"}]]}
+
+ {:db/ident :migration/estate-unit-comments
+  :txes [[{:db/doc "Reference to the project for which the unit-comments entity exists"
+           :db/ident :unit-comments/project
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one}
+          {:db/doc "Estate-id to which the comments exist"
+           :db/ident :unit-comments/unit-id
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one}
+          {:db/ident :unit-comments/comments
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/many}
+          {:db/ident :unit-comments/project+unit-id
+           :db/valueType :db.type/tuple
+           :db/tupleAttrs [:unit-comments/project :unit-comments/unit-id]
+           :db/cardinality :db.cardinality/one
+           :db/unique :db.unique/identity
+           :db/doc "Ensure there is only one unit-comments for an unit per project"}]]}
+ {:db/ident :migration/add-project-manager-to-activity
+  :txes [[{:db/ident       :activity/manager
+           :db/cardinality :db.cardinality/one
+           :db/valueType   :db.type/ref
+           :db/doc         "User who manages the activity"}]]}
+
+ {:db/ident :migration/file-upload-status
+  :txes [[{:db/ident :file/upload-complete?
+           :db/cardinality :db.cardinality/one
+           :db/valueType :db.type/boolean
+           :db/doc "Set to true when upload is complete and file exists in S3"}]
+
+         teet.migration.file-upload-complete/existing-files-upload-complete]}
+
+ ;; Track file seen status per user... no need for history
+ {:db/ident :migration/file-seen-status
+  :txes [[{:db/ident :file-seen/file
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one
+           :db/noHistory true}
+          {:db/ident :file-seen/user
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one
+           :db/noHistory true}
+          {:db/ident :file-seen/file+user
+           :db/valueType :db.type/tuple
+           :db/tupleAttrs [:file-seen/file :file-seen/user]
+           :db/cardinality :db.cardinality/one
+           :db/unique :db.unique/identity
+           :db/doc "Unique file+user pair that identifies this entity"
+           :db/noHistory true}
+          {:db/ident :file-seen/seen-at
+           :db/valueType :db.type/instant
+           :db/cardinality :db.cardinality/one
+           :db/doc "When the user has seen this file. Updated every time file page is opened or file is downloaded."
+           :db/noHistory true}]]}
+
+ {:db/ident :migration/task-type-options-update
+  :txes [[[:db/retractEntity [:db/ident :task.type/site-plan]]
+          {:db/ident :task.type/general-part
+           :enum/valid-for :task.group/design}]]}
+
+ {:db/ident :migration/comment-entity-seen
+  :txes [[{:db/ident :comments-seen/user
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one
+           :db/noHistory true}
+          {:db/ident :comments-seen/entity
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one
+           :db/noHistory true}
+          {:db/ident :comments-seen/seen-at
+           :db/valueType :db.type/instant
+           :db/cardinality :db.cardinality/one
+           :db/doc "When was the last time user saw this entitys comments"
+           :db/noHistory true}
+          {:db/ident :comments-seen/entity+user
+           :db/valueType :db.type/tuple
+           :db/tupleAttrs [:comments-seen/entity :comments-seen/user]
+           :db/cardinality :db.cardinality/one
+           :db/unique :db.unique/identity
+           :db/doc "A single entity and user pair should only save a single last seen timestamp"
+           :db/noHistory true}]]}
+
+ {:db/ident :migration/work-meetings-v1
+  :txes [[{:db/ident :activity/meetings
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/many}
+          {:db/ident :meeting/title
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one}
+          {:db/ident :meeting/location
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one}
+          {:db/ident :meeting/start
+           :db/valueType :db.type/instant
+           :db/cardinality :db.cardinality/one}
+          {:db/ident :meeting/end
+           :db/valueType :db.type/instant
+           :db/cardinality :db.cardinality/one}
+          {:db/ident :meeting/organizer
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one}
+          {:db/ident :meeting/number
+           :db/valueType :db.type/long
+           :db/cardinality :db.cardinality/one}]]}
+ {:db/ident :migration/work-meetings-agenda
+  :txes [[{:db/ident :meeting/agenda
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/many
+           :db/isComponent true
+           :db/doc "Agenda entries for this meeting"}
+
+          {:db/ident :meeting.agenda/topic
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one
+           :db/doc "Short agenda topic description in plain text."}
+
+          {:db/ident :meeting.agenda/body
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one
+           :db/doc "Agenda body. rich text in markdown format."}
+
+          {:db/ident :meeting.agenda/responsible
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one
+           :db/doc "Reference to user who is responsible for this item"}]]}
+
+
+ {:db/ident :migration/participation
+  :txes [[{:db/ident :participation/in
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one
+           :db/doc "The entity this participation is in, for example a meeting or task."}
+
+          {:db/ident :participation/participant
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one
+           :db/doc "Reference to the user who is participating"}
+
+          {:db/ident :participation/role
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one
+           :db/doc "Enum refererence to participation role"}
+
+          {:db/ident :participation.role/reviewer
+           :enum/attribute :participation/role
+           :db/doc "Participation as reviewer that must accept/decline decisions or work"}
+
+          {:db/ident :participation.role/participant
+           :enum/attribute :participation/role
+           :db/doc "Regular participation"}]]}
+
+
+ {:db/ident :migration/stable-file-keys
+  :txes [[{:db/ident :file/s3-key
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one
+           :db/unique :db.unique/identity
+           :db/doc "The key this file is stored with in the documents S3 bucket."}]
+         teet.migration.file-s3-key/set-file-keys]}
+
+ {:db/ident :migration/work-meetings-decisions
+  :txes [[{:db/ident :meeting.agenda/decisions
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/many
+           :db/isComponent true
+           :db/doc "List of all decisions in an agenda entry"}
+          {:db/ident :meeting.decision/body
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one
+           :db/doc "Decision body made in rich text"}]]}
+
+ {:db/ident :migration/meeting-invitations-sent
+  :txes [[{:db/ident :meeting/invitations-sent-at
+           :db/valueType :db.type/instant
+           :db/cardinality :db.cardinality/one
+           :db/doc "Timestamp for when the meetings calendar invitations were sent"}]]}
+
+ {:db/ident :migration/file-attached-to
+  :txes [[{:db/ident :file/attached-to
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/many
+           :db/doc "Entities this file is attached to."}]]}
+
+ {:db/ident :migration/stable-integration-id
+  :txes [[{:db/ident :integration/id
+           :db/cardinality :db.cardinality/one
+           :db/valueType :db.type/uuid
+           :db/unique :db.unique/identity
+           :db/doc "UUID identifier for THK integration that is stable across backup/restore"}]
+
+         teet.migration.thk-integration-id/migrate]}
+
+ {:db/ident :migration/review
+  :txes [[{:db/ident :review/of
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one
+           :db/doc "The entity for which this review exists"}
+
+          {:db/ident :review/reviewer
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one
+           :db/doc "Reference to the user doing the reviewing"}
+
+          {:db/ident :review/decision
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one
+           :db/doc "Only one decision per review"}
+
+          {:db/ident :review/comment
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one
+           :db/doc "Comment related to the review"}
+
+          {:db/ident :review.decision/approved
+           :enum/attribute :review/decision}
+
+          {:db/ident :review.decision/rejected
+           :enum/attribute :review/decision}]]}
+
+ {:db/ident :migration/link-with-type
+  :txes [[{:db/ident :link/from
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one
+           :db/doc "The entity this link originates from."}
+
+          {:db/ident :link/type
+           :db/valueType :db.type/keyword
+           :db/cardinality :db.cardinality/one
+           :db/doc "Keyword describing the role of the destination entity. May be entity type or external datasource name."}
+
+          {:db/ident :link/to
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one
+           :db/doc "The destination entity this link points to. When link type points to an internal entity"}
+
+          {:db/ident :link/external-id
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one
+           :db/doc "Id of destination in the external datasource referred to by link type"}]]}
+
+ {:db/ident :migration/lock-meeting
+  :txes [[{:db/ident :meeting/locked?
+           :db/valueType :db.type/boolean
+           :db/cardinality :db.cardinality/one
+           :db/doc "Transacted to true once all reviewers have accepted the meeting"}]]}
+
+ {:db/ident :migration/decision-number
+  :txes [[{:db/ident :meeting.decision/number
+           :db/valueType :db.type/long
+           :db/cardinality :db.cardinality/one
+           :db/doc "All decisions get an incrementing number based on the agenda topic."}]]}
+ {:db/ident :migration/meeting-updated-notification
+  :txes [[{:db/ident :notification.type/meeting-updated :enum/attribute :notification/type}]]}
+
+ {:db/ident :migration/new-file-metadata
+  :txes [;; Also store the original name of the file
+         [{:db/ident :file/original-name
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one
+           :db/doc "Original name of the file when it was uploaded."}]
+
+         ;; New file grouping by part (folders within task)
+         [{:db/ident :file/part
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one
+           :db/doc "Part this file belongs to."}
+
+          {:db/ident :file.part/task
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one
+           :db/doc "Task this part belongs to."}
+          {:db/ident :file.part/name
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one
+           :db/doc "Human readable name of this part."}
+          {:db/ident :file.part/number
+           :db/valueType :db.type/long
+           :db/cardinality :db.cardinality/one
+           :db/doc "Incrementing number of this part from 1 to 99. Unique within task."}]
+
+         ;; Document group
+         [{:db/ident :file/document-group
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one
+           :db/doc "Enum reference to document group"}
+
+          {:db/ident :file.document-group/general
+           :enum/attribute :file/document-group
+           :filename/code "0"}
+
+          {:db/ident :file.document-group/drawings-and-plans
+           :enum/attribute :file/document-group
+           :filename/code "1"}
+
+          {:db/ident :file.document-group/models
+           :enum/attribute :file/document-group
+           :filename/code "2"}
+
+          {:db/ident :file.document-group/reports
+           :enum/attribute :file/document-group
+           :filename/code "3"}
+
+          {:db/ident :file.document-group/specifications
+           :enum/attribute :file/document-group
+           :filename/code "4"}
+
+          ;; 5-8 are reserved for future use
+
+          {:db/ident :file.document-group/annexes
+           :enum/attribute :file/document-group
+           :filename/code "9"}]
+
+         ;; Sequence number
+         [{:db/ident :file/sequence-number
+           :db/valueType :db.type/long
+           :db/cardinality :db.cardinality/one
+           :db/doc "Sequence number of this file"}]
+
+         ;; Migrate POS# for land task files to sequence number
+         teet.migration.file-sequence-number/pos-number->sequence-number]}
+
+ ;; TEET-822 Add Warranty activity for Construction lifecycle
+ {:db/ident :migration/construction-lifecycle
+  :txes [[;; Add warranty, add lifecycle for construction
+          {:db/ident :activity.name/warranty,
+           :enum/attribute :activity/name,
+           :enum/valid-for :thk.lifecycle-type/construction,
+           :filename/code "GA"}
+          {:db/ident :activity.name/construction,
+           :enum/valid-for :thk.lifecycle-type/construction}
+          [:db/retractEntity [:db/ident :activity.name/workshop-design]]]
+
+         [;; new THK task types
+          {:db/ident :thk.task-type/owners-supervision :thk/code "4006"}
+          {:db/ident :thk.task-type/electricity :thk/code "4007"}
+          {:db/ident :thk.task-type/construction-other :thk/code "4008"}
+          {:db/ident :thk.task-type/road-safety-audit :thk/code "4009"}]
+
+         [;; new construction task groups
+          {:db/ident :task.group/working-design :enum/attribute :task/group}
+          {:db/ident :task.group/construction :enum/attribute :task/group}
+          {:db/ident :task.group/construction-quality-assurance :enum/attribute :task/group}
+          {:db/ident :task.group/construction-approval :enum/attribute :task/group}
+          {:db/ident :task.group/warranty :enum/attribute :task/group}]
+
+         [;; remove land-owners task
+          [:db/retractEntity [:db/ident :task.type/land-owners]]
+
+          ;; new task types for construction
+          {:db/ident :task.type/construction-general-part,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/design, ;; This is an error, fixed in a subsequent migration
+           :filename/code "AA"}
+          {:db/ident :task.type/construction-road,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/working-design,
+           :filename/code "TL"}
+          {:db/ident :task.type/construction-railroad,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/working-design,
+           :filename/code "TR"}
+          {:db/ident :task.type/construction-drainage,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/working-design,
+           :filename/code "DR"}
+          {:db/ident :task.type/construction-landscaping,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/working-design,
+           :filename/code "MA"}
+          {:db/ident :task.type/construction-lighting,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/working-design,
+           :filename/code "EL"}
+          {:db/ident :task.type/construction-equipment,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/working-design,
+           :filename/code "EQ"}
+          {:db/ident :task.type/construction-structures,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/working-design,
+           :filename/code "TS"}
+          {:db/ident :task.type/construction-utilities,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/working-design,
+           :filename/code "TV"}
+          {:db/ident :task.type/construction-other-facilities,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/working-design,
+           :filename/code "MR"}
+
+          ;; move building permit to construction
+          {:db/ident :task.type/building-permit
+           :enum/valid-for :task.group/construction}
+          {:db/ident :task.type/project-management,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/construction,
+           :filename/code "PM"}
+          {:db/ident :task.type/collaboration,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/construction,
+           :filename/code "KK"}
+          {:db/ident :task.type/key-persons,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/construction,
+           :filename/code "KP"}
+          ;; Bill of Quantities, cost-list used for consistency with design phase
+          {:db/ident :task.type/construction-cost-list,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/construction,
+           :filename/code "CL"}
+          {:db/ident :task.type/instructions,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/construction,
+           :filename/code "JU"}
+          {:db/ident :task.type/grid-connections,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/construction,
+           ;; :thk/task-type :thk.task-type/electricity,
+           :filename/code "GC"}
+          {:db/ident :task.type/traffic-arrangement,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/construction,
+           :filename/code "TA"}
+
+          {:db/ident :task.type/owners-supervision,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/construction-quality-assurance,
+           ;; :thk/task-type :thk.task-type/owners-supervision,
+           :filename/code "OJ"}
+          {:db/ident :task.type/materials-and-products,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/construction-quality-assurance,
+           ;; :thk/task-type :thk.task-type/construction-other,
+           :filename/code "MT"}
+          {:db/ident :task.type/measurements,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/construction-quality-assurance,
+           :filename/code "ME"}
+          {:db/ident :task.type/laboratory,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/construction-quality-assurance,
+           ;; :thk/task-type :thk.task-type/construction-other,
+           :filename/code "LT"}
+
+          {:db/ident :task.type/road-safety-audit,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/construction-approval,
+           ;; :thk/task-type :thk.task-type/road-safety-audit,
+           :filename/code "LA"}
+          {:db/ident :task.type/acceptance,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/construction-approval,
+           :filename/code "VV"}
+
+          {:db/ident :task.type/inspections,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/warranty,
+           :filename/code "GY"}
+          {:db/ident :task.type/construction-other,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/warranty,
+           :filename/code "ZZ"}]]}
+ ;; The tasks below should not be sent to THK
+ {:db/ident :migration/TEET-822-retract-thk-task-types
+  :txes [[[:db/retract [:db/ident :task.type/design-requirements] :thk/task-type :thk.task-type/design-requirements]
+          [:db/retract [:db/ident :task.type/building-permit] :thk/task-type :thk.task-type/building-permit]]]}
+
+ {:db/ident :migration/extra-user-info
+  :txes [[{:db/ident :user/phone-number
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one
+           :db/doc "Phone number associated with the user"}
+
+          {:db/ident :user/company
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one
+           :db/doc "Name of the company the user is associated with"}]]}
+
+ {:db/ident :migration/deactivate-user
+  :txes [[{:db/ident :user/deactivated?
+           :db/valueType :db.type/boolean
+           :db/cardinality :db.cardinality/one
+           :db/doc "Is the user disabled? If so can't login or select the user in user selections"}]]}
+
+ {:db/ident :migration/remove-overlapping-global-rights
+  :txes [teet.migration.user-permissions/remove-overlapping-global-rights]}
+
+ {:db/ident :migration/comment-mention-using-uuid
+  :txes [teet.migration.comment-mention-userid/rewrite-comment-mentions!]}
+
+ {:db/ident :migration/remove-overlapping-global-rights-properly
+  :txes [teet.migration.user-permissions/remove-overlapping-global-rights]}
+
+ {:db/ident :migration/thk-project-integration-id
+  :txes [teet.migration.thk-integration-id/migrate-projects]}
+
+ {:db/ident :migration/move-construction-general-part-to-working-design
+  :txes [[{:db/ident :task.type/construction-general-part,
+           :enum/valid-for :task.group/working-design}]]}
+
+ {:db/ident :migration/meeting-comments
+  :txes [[{:db/ident :meeting/comments
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/many
+           :db/doc "Comments for this meeting"}]]}
+
+ {:db/ident :migration/participation-absent?
+  :txes [[{:db/ident :participation/absent?
+           :db/valueType :db.type/boolean
+           :db/cardinality :db.cardinality/one
+           :db/doc "Was the participant absent in the meeting?"}
+          {:db/ident :participation.role/organizer
+           :db/doc "Participation role for organizer. Purposefully doesn't have :enum/valid-for to not show in selection"}]]}
+
+ {:db/ident :migration/meeting-notifications-sent
+  :txes [[{:db/ident :meeting/notifications-sent-at
+           :db/valueType :db.type/instant
+           :db/cardinality :db.cardinality/one
+           :db/doc "Timestamp for when the email notifications of the meeting was last sent"}]]}
+
+
+ {:db/ident :migration/cooperation
+  :txes [[ ;; Add new enum values for cooperation option lists
+          {:db/ident :cooperation.application.type/design-conditions-draft
+           :enum/attribute :cooperation.application/type}
+          {:db/ident :cooperation.application.type/design
+           :enum/attribute :cooperation.application/type}
+          {:db/ident :cooperation.application.type/topogeodetic-base-plan
+           :enum/attribute :cooperation.application/type}
+          {:db/ident :cooperation.application.type/geological-survey-plan
+           :enum/attribute :cooperation.application/type}
+          {:db/ident :cooperation.application.type/ex-ante-eia
+           :enum/attribute :cooperation.application/type}
+          {:db/ident :cooperation.application.type/eia-report
+           :enum/attribute :cooperation.application/type}
+          {:db/ident :cooperation.application.type/building-permit-draft
+           :enum/attribute :cooperation.application/type}
+          {:db/ident :cooperation.application.type/building-permit-order
+           :enum/attribute :cooperation.application/type}
+          {:db/ident :cooperation.application.type/work-permit
+           :enum/attribute :cooperation.application/type}
+          {:db/ident :cooperation.application.type/forest-notification
+           :enum/attribute :cooperation.application/type}
+          {:db/ident :cooperation.application.type/special-use-water-permit
+           :enum/attribute :cooperation.application/type}
+          {:db/ident :cooperation.application.type/waste-permit
+           :enum/attribute :cooperation.application/type}
+          {:db/ident :cooperation.application.type/use-permit
+           :enum/attribute :cooperation.application/type}
+          {:db/ident :cooperation.application.type/other
+           :enum/attribute :cooperation.application/type}
+
+          ;; Response type enum values
+          {:db/ident :cooperation.application.response-type/opinion
+           :enum/attribute :cooperation.application/response-type}
+          {:db/ident :cooperation.application.response-type/coordination
+           :enum/attribute :cooperation.application/response-type}
+          {:db/ident :cooperation.application.response-type/consent
+           :enum/attribute :cooperation.application/response-type}
+          {:db/ident :cooperation.application.response-type/other
+           :enum/attribute :cooperation.application/response-type}
+
+          ;; Cooperation 3rd party entity
+          {:db/ident :cooperation.3rd-party/name
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one
+           :db/doc "Name of 3rd party"}
+          {:db/ident :cooperation.3rd-party/id-code
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one
+           :db/doc "Registry id of 3rd party (business or person)"}
+          {:db/ident :cooperation.3rd-party/email
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one
+           :db/doc "Contact email address"}
+          {:db/ident :cooperation.3rd-party/phone
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one
+           :db/doc "Contact phone number"}
+          {:db/ident :cooperation.3rd-party/project
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one
+           :db/doc "Project this 3rd party relates to"}
+          {:db/ident :cooperation.3rd-party/applications
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/many
+           :db/doc "All cooperation applications for this 3rd party"}
+
+          ;; Cooperation application entity
+          {:db/ident :cooperation.application/type
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one
+           :db/doc "Enum reference to application type"}
+          {:db/ident :cooperation.application/response-type
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one
+           :db/doc "Enum reference to the response type"}
+          {:db/ident :cooperation.application/date
+           :db/valueType :db.type/instant
+           :db/cardinality :db.cardinality/one
+           :db/doc "Application date (sent out)"}
+          {:db/ident :cooperation.application/response-deadline
+           :db/valueType :db.type/instant
+           :db/cardinality :db.cardinality/one
+           :db/doc "Response deadline"}
+          {:db/ident :cooperation.application/comment
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one
+           :db/doc "Free text comment"}
+          {:db/ident :cooperation.application/response
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one
+           :db/doc "Reference to the response entity"}
+
+          {:db/ident :cooperation.application/position
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one
+           :db/doc "Reference to the Maanteeamet position entity"}
+
+          ;; Cooperation response statuses
+          {:db/ident :cooperation.response.status/no-objection
+           :enum/attribute :cooperation.response/status}
+          {:db/ident :cooperation.response.status/no-objection-with-terms
+           :enum/attribute :cooperation.response/status}
+          {:db/ident :cooperation.response.status/objection
+           :enum/attribute :cooperation.response/status}
+          {:db/ident :cooperation.response.status/no-response
+           :enum/attribute :cooperation.response/status}
+
+          ;; Cooperation response entity
+          {:db/ident :cooperation.response/status
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one
+           :db/doc "Enum reference to response status"}
+          {:db/ident :cooperation.response/date
+           :db/valueType :db.type/instant
+           :db/cardinality :db.cardinality/one
+           :db/doc "Date of when response arrived"}
+          {:db/ident :cooperation.response/valid-months
+           :db/valueType :db.type/long
+           :db/cardinality :db.cardinality/one
+           :db/doc "How many months the response is valid for"}
+          {:db/ident :cooperation.response/valid-until
+           :db/valueType :db.type/instant
+           :db/cardinality :db.cardinality/one
+           :db/doc "Validity end date calculated from response date and valid months"}
+          {:db/ident :cooperation.response/content
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one
+           :db/doc "Rich text content of the response"}
+
+          ;; Cooperation position decisions
+          {:db/ident :cooperation.position.decision/agreed
+           :enum/attribute :cooperation.position/decision}
+          {:db/ident :cooperation.position.decision/rejected
+           :enum/attribute :cooperation.position/decision}
+          {:db/ident :cooperation.position.decision/partially-rejected
+           :enum/attribute :cooperation.position/decision}
+
+          ;; Cooperation position entity
+          {:db/ident :cooperation.position/decision
+           :db/cardinality :db.cardinality/one
+           :db/valueType :db.type/ref
+           :db/doc "Ref to decision type enum"}
+          {:db/ident :cooperation.position/comment
+           :db/cardinality :db.cardinality/one
+           :db/valueType :db.type/string
+           :db/doc "Rich text comment for decision"}]]}
+
+ {:db/ident :migration/migrate-organizer-for-old-meetings
+  :txes [teet.migration.meeting-organizer-participation/migrate-meeting-organizers]}
+
+ {:db/ident :migration/file-stable-id
+  :txes [[{:db/ident :file/id
+           :db/valueType :db.type/uuid
+           :db/cardinality :db.cardinality/one
+           :db/unique :db.unique/value
+           :db/doc "Stable document id that is always on the latest version"}]
+         teet.migration.file-id/migrate]}
+
+ {:db/ident :migration/cooperation-activity-relation
+  :txes [[{:db/ident :cooperation.application/activity
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one
+           :db/doc "Applications need to reference an existing activity."}]]}
+
+
+ ;; Clarify cooperation terms
+ {:db/ident :migration/cooperation-opinion-terms
+  :txes [[{:db/id :cooperation.application/position
+           :db/ident :cooperation.application/opinion
+           :db/doc "Reference to the Opinion of Competent Authority -entity"}
+
+          {:db/id :cooperation.position/decision
+           :db/ident :cooperation.opinion/status
+           :db/doc "Enum ref to opinion status"}
+
+          {:db/id :cooperation.position/comment
+           :db/ident :cooperation.opinion/comment
+           :db/doc "Rich text comment for opinion"}
+
+          {:db/ident :cooperation.opinion.status/agreed
+           :enum/attribute :cooperation.opinion/status}
+          {:db/ident :cooperation.opinion.status/rejected
+           :enum/attribute :cooperation.opinion/status}
+          {:db/ident :cooperation.opinion.status/partially-rejected
+           :enum/attribute :cooperation.opinion/status}]]}
+ {:db/ident :migration/stable-integration-id-2
+  :txes [[{:db/ident :integration/id
+           :db/cardinality :db.cardinality/one
+           :db/valueType :db.type/uuid
+           :db/unique :db.unique/identity
+           :db/doc "UUID identifier for THK integration (dev env db didn't have integration ids on all)"}]
+         teet.migration.thk-integration-id/migrate-2]}
+
+ {:db/ident :migration/application-contact
+  :txes [[{:db/ident :cooperation.application/contact
+           :db/cardinality :db.cardinality/one
+           :db/valueType :db.type/ref
+           :db/isComponent true
+           :db/doc "Contact info for application"}
+
+          {:db/ident :cooperation.contact/name
+           :db/cardinality :db.cardinality/one
+           :db/valueType :db.type/string
+           :db/doc "Name of contact person"}
+
+          {:db/ident :cooperation.contact/company
+           :db/cardinality :db.cardinality/one
+           :db/valueType :db.type/string
+           :db/doc "Company info of contact"}
+
+          {:db/ident :cooperation.contact/id-code
+           :db/cardinality :db.cardinality/one
+           :db/valueType :db.type/string
+           :db/doc "Company business registry number"}
+
+          {:db/ident :cooperation.contact/email
+           :db/cardinality :db.cardinality/one
+           :db/valueType :db.type/string
+           :db/doc "Email address"}
+
+          {:db/ident :cooperation.contact/phone
+           :db/cardinality :db.cardinality/one
+           :db/valueType :db.type/string
+           :db/doc "Phone number"}]]}
+
+ {:db/ident :migration/add-missing-unanswered
+  :txes [[{:db/ident :cooperation.opinion.status/unanswered
+           :enum/attribute :cooperation.opinion/status}]]}
+
+ ;; Cooperation notifications
+ {:db/ident :migration/notification-cooperation-application-expire-soon
+  :txes [[{:db/ident :notification.type/cooperation-response-to-application-added
+           :enum/attribute :notification/type}
+          {:db/ident :notification.type/cooperation-application-expired-soon
+           :enum/attribute :notification/type}]]}
+
+ ;; Generic :teet/id UUID for things that don't need stable ids
+ {:db/ident :migration/generic-teet-id
+  :txes [[{:db/ident :teet/id
+           :db/valueType :db.type/uuid
+           :db/cardinality :db.cardinality/one
+           :db/unique :db.unique/identity
+           :db/doc "Generic UUID for entities that need a stable id"}]
+         teet.migration.teet-id/cooperation-teet-ids]}
+
+ ;; Alias previous :file-seen stuff as generic :entity-seen
+ {:db/ident :migration/entity-seen-status
+  :txes [[{:db/id :file-seen/file
+           :db/ident :entity-seen/entity}
+          {:db/id :file-seen/user
+           :db/ident :entity-seen/user}
+          {:db/id :file-seen/file+user
+           :db/ident :entity-seen/entity+user}
+          {:db/id :file-seen/seen-at
+           :db/ident :entity-seen/seen-at}]]}
+
+ {:db/ident :migration/road-safety-design-and-construction-codes-v3
+  :txes [[{:db/ident :thk.task-type/design-road-safety-audit :thk/code "4011"}]
+         [{:db/ident :task.type/design-road-safety-audit,
+           ;; ;; pre-existing attributes:
+           ;; :enum/attribute :task/type,
+           ;; :enum/valid-for :task.group/design-approval,
+           ;; :filename/code "LA"
+           ;; ;; previous (wrong) value of this attribute:
+           ;; :thk/task-type :thk.task-type/road-safety-audit,
+           ;; ;; corrected:
+           :thk/task-type :thk.task-type/design-road-safety-audit,}]]}
+
+ {:db/ident :migration/vektorio-attributes
+  :txes [[{:db/ident :vektorio/project-id
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one
+           :db/doc "ID of the project in vektorio"}
+          {:db/ident :vektorio/model-id
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one
+           :db/doc "ID of the model in vektorio"}]]}
+
+ {:db/ident :migration/land-modal-opinions
+  :txes [[{:db/ident :land-owner-opinion/activity
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one
+           :db/doc "The activity the opinion is about"}
+
+          {:db/ident :land-owner-opinion/project
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one
+           :db/doc "The project in which this opinion exists"}
+
+          {:db/ident :land-owner-opinion/land-unit
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one
+           :db/doc "The ID of the land unit"}
+
+          {:db/ident :land-owner-opinion/type
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one
+           :db/doc "Opinion type"}
+          {:db/ident :land-owner-opinion.type/ex-ante-eia
+           :enum/attribute :land-owner-opinion/type}
+          {:db/ident :land-owner-opinion.type/design-conditions-draft
+           :enum/attribute :land-owner-opinion/type}
+          {:db/ident :land-owner-opinion.type/design
+           :enum/attribute :land-owner-opinion/type}
+          {:db/ident :land-owner-opinion.type/eia-report
+           :enum/attribute :land-owner-opinion/type}
+          {:db/ident :land-owner-opinion.type/construction
+           :enum/attribute :land-owner-opinion/type}
+
+          {:db/ident :land-owner-opinion/respondent-name
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one}
+
+          {:db/ident :land-owner-opinion/respondent-connection-to-land
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one}
+
+          {:db/ident :land-owner-opinion/date
+           :db/valueType :db.type/instant
+           :db/cardinality :db.cardinality/one}
+
+          {:db/ident :land-owner-opinion/link-to-response
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one
+           :db/doc "String link to an external site about the opinion"}
+
+          {:db/ident :land-owner-opinion/body
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one
+           :db/doc "Rich text containing the actual opinion"}
+
+          {:db/ident :land-owner-opinion/authority-position
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one
+           :db/doc "Rich text containing the authoritys position on the opinion"}]]}
+
+ {:db/ident :migration/vektorio-user-projects
+  :txes [[{:db/ident :vektorio/granted-projects
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/many
+           :db/doc "ID-s of the Vektor projects the user has granted access to"}]]}
+
+ {:db/ident :migration/thk-contracts
+  :txes [[{:db/ident :thk.contract/number
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one
+           :db/doc "Link to contract file in document management system for procurement part"}
+
+          {:db/ident :thk.contract/procurement-number
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one
+           :db/doc "Procurement no /Hanke nr - (if starts with number then converted into link to State procurement registry as https://riigihanked.riik.ee/rhr-web/#/procurement/<proc_No>), if starts with other symbol then leave it as a number)"}
+
+          {:db/ident :thk.contract/procurement-id
+           :db/valueType :db.type/string
+           :db/unique :db.unique/identity
+           :db/cardinality :db.cardinality/one
+           :db/doc "Procurement id, has to be unique as it is used in web links"}
+
+          ;; TA Regions
+          {:db/ident :ta.region/north
+           :thk/code "1800" :enum/attribute :ta/region}
+          {:db/ident :ta.region/east
+           :thk/code "1801" :enum/attribute :ta/region}
+          {:db/ident :ta.region/south
+           :thk/code "1802" :enum/attribute :ta/region}
+          {:db/ident :ta.region/west
+           :thk/code "1803" :enum/attribute :ta/region}
+          {:db/ident :ta.region/center
+           :thk/code "1804" :enum/attribute :ta/region}
+
+
+          {:db/ident :ta/region
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one
+           :db/doc "The region of the Project is displayed"}
+
+          ;; Contract types
+          {:db/ident :thk.contract.type/construction-works
+           :thk/code "3500" :enum/attribute :thk.contract/type}
+          {:db/ident :thk.contract.type/things
+           :thk/code "3501" :enum/attribute :thk.contract/type}
+          {:db/ident :thk.contract.type/services
+           :thk/code "3502" :enum/attribute :thk.contract/type}
+
+          {:db/ident :thk.contract/type
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one
+           :db/doc "Comes from THK, not editable (activity_procurementType, activity_procurementTypeFK"}
+
+          {:db/ident :thk.contract/signed-at
+           :db/valueType :db.type/instant
+           :db/cardinality :db.cardinality/one
+           :db/doc "Date when contract was signed, added manually in the detail view of contract"}
+
+          {:db/ident :thk.contract/deadline
+           :db/valueType :db.type/instant
+           :db/cardinality :db.cardinality/one
+           :db/doc "The first deadline, added manually in the detail view of contract"}
+
+          {:db/ident :thk.contract/extended-deadline
+           :db/valueType :db.type/instant
+           :db/cardinality :db.cardinality/one
+           :db/doc "The extended deadline, added manually in the detail view of contract"}
+
+          {:db/ident :thk.contract/warranty-period
+           :db/valueType :db.type/long
+           :db/cardinality :db.cardinality/one
+           :db/doc "The length of warranty period in months"}
+
+          {:db/ident :thk.contract/warranty-end-date
+           :db/valueType :db.type/instant
+           :db/cardinality :db.cardinality/one
+           :db/doc "The end date of warranty period"}
+
+          {:db/ident :thk.contract/authority-contact
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one
+           :db/doc "TA responsible person. Added manually in the detail view of contract"}
+
+          {:db/ident :thk.contract/partner-name
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one
+           :db/doc "Added manually in the detail view of contract. Lead partner only."}
+
+          {:db/ident :thk.contract/cost
+           :db/valueType :db.type/bigdec
+           :db/cardinality :db.cardinality/one
+           :db/doc "Added manually, the same as in the detail view: capital amount in euro"}
+
+          {:db/ident :thk.contract/targets
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/many
+           :db/doc "Targets of the contract, can be activities or tasks"}
+
+          {:db/ident :thk.contract/start-date
+           :db/valueType :db.type/instant
+           :db/cardinality :db.cardinality/one
+           :db/doc "Administrative Start date of the Contract"}]]}
+
+ {:db/ident :migration/thk-contracts2
+  :txes [[{:db/ident :thk.contract/name
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one
+           :db/doc "The name of the contract as received from THK"}
+
+          {:db/ident :thk.contract/part-name
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one
+           :db/doc "The name of the contract as received from THK"}
+
+          {:db/ident :thk.contract/procurement-part-id
+           :db/valueType :db.type/string
+           :db/unique :db.unique/identity
+           :db/cardinality :db.cardinality/one
+           :db/doc "Procurement part id, is expected to be unique"}
+
+          [:db/retract :thk.contract/procurement-id :db/unique :db.unique/identity]]]}
+
+ {:db/ident :migration/retract-activity-procurement-info
+  :txes [teet.migration.activity-procurement-info/retract-procurement-info-from-activity]}
+
+ {:db/ident :migration/thk.contracts3
+  :txes [[{:db/ident :thk.contract/external-link
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one
+           :db/doc "Link to an external service given by the user"}
+
+          {:db/ident :thk.contract/start-of-work
+           :db/valueType :db.type/instant
+           :db/cardinality :db.cardinality/one
+           :db/doc "Start of work value given by the user"}
+          {:db/ident :thk.contract/procurement-id+procurement-part-id
+           :db/valueType :db.type/tuple
+           :db/tupleAttrs [:thk.contract/procurement-id :thk.contract/procurement-part-id]
+           :db/cardinality :db.cardinality/one
+           :db/unique :db.unique/identity
+           :db/doc "Ensure there is only one contract per procurement-id and part-id combination"}]]}
+
+ {:db/ident :migration/contract-partners
+  :txes [;; COMPANY BASIC INFORMATION
+         [{:db/ident :company/country
+           :db/valueType :db.type/keyword
+           :db/cardinality :db.cardinality/one
+           :db/doc "ISO code of the country"}
+
+          {:db/ident :company/name
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one}
+
+          {:db/ident :company/business-registry-code
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one}
+
+          {:db/ident :company/emails
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/many}
+
+          {:db/ident :company/phone-numbers
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/many}]
+
+         ;; LINK ENTITY BETWEEN COMPANY AND CONTRACT
+         [{:db/ident :company-contract/company
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one}
+
+          {:db/ident :company-contract/contract
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one
+           :db/doc "REFERENCES :thk.contract/..."}
+
+          {:db/ident :company-contract/lead-partner?
+           :db/valueType :db.type/boolean
+           :db/cardinality :db.cardinality/one}
+
+          {:db/ident :company-contract/sub-company-contracts
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/many
+           :db/isComponent true
+           :db/doc "REFERENCES :company-contract/..."}
+
+          {:db/ident :company-contract/employees
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/many
+           :db/isComponent true
+           :db/doc "REFERENCES :company-contract-employee/..."}
+
+          {:db/ident :company-contract/work-description
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one
+           :db/doc "String description of the work to be done by the company in this contract"}]
+
+         ;; LINK ENTITY BETWEEN COMPANY-CONTRACT AND USER
+         [{:db/ident :company-contract-employee/user
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one
+           :db/doc "REFERENCES :user/..."}
+
+          {:db/ident :company-contract-employee/key-person?
+           :db/valueType :db.type/boolean
+           :db/cardinality :db.cardinality/one}
+
+          {:db/ident :company-contract-employee/role
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/many}
+
+          ;; USE :review entities for key person reviews
+          {:db/ident :company-contract-employee/accepted?
+           :db/valueType :db.type/boolean
+           :db/cardinality :db.cardinality/one
+           :db/doc "When all required reviews are in state accepted accept the company-contract-employee as well"}
+
+          {:db/ident :company-contract-employee.role/company-representative
+           :enum/attribute :company-contract-employee/role}
+
+          {:db/ident :company-contract-employee.role/company-project-manager
+           :enum/attribute :company-contract-employee/role}
+
+          {:db/ident :company-contract-employee.role/team-member
+           :enum/attribute :company-contract-employee/role}
+
+          {:db/ident :company-contract-employee.role/supervisor
+           :enum/attribute :company-contract-employee/role}
+
+          {:db/ident :company-contract-employee/active?
+           :db/valueType :db.type/boolean
+           :db/cardinality :db.cardinality/one}]
+
+         [;; USER CHANGES
+          {:db/ident :user/documents
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/many
+           :db/doc "CV's, certificates and other job related documents related to the user"}]]}
+
+{:db/ident :migration/additional-file-statuses
+ :txes [[{:db/ident :file.status/submitted :enum/attribute :file/status}
+         {:db/ident :file.status/returned :enum/attribute :file/status}
+         {:db/ident :file.status/valid :enum/attribute :file/status}
+         {:db/ident :file.status/invalid :enum/attribute :file/status}]]}
+
+{:db/ident :migration/file-part-status
+ :txes [[{:db/ident :file.part/status
+          :db/valueType :db.type/ref
+          :db/cardinality :db.cardinality/one}
+         {:db/ident :file.part.status/not-started :enum/attribute :file.part/status}
+         {:db/ident :file.part.status/in-progress :enum/attribute :file.part/status}
+         {:db/ident :file.part.status/waiting-for-review :enum/attribute :file.part/status}
+         {:db/ident :file.part.status/reviewing :enum/attribute :file.part/status}
+         {:db/ident :file.part.status/completed :enum/attribute :file.part/status}]]}
+
+{:db/ident :migration/copy-status-and-metainfo-from-task-to-part
+  :txes [teet.migration.file-part-statuses/task-status-meta->file-part]}
+
+{:db/ident :migration/file-part-review-notifications
+  :txes [[{:db/ident :notification.type/task-part-waiting-for-review :enum/attribute :notification/type}
+          {:db/ident :notification.type/task-part-review-accepted :enum/attribute :notification/type}
+          {:db/ident :notification.type/task-part-review-rejected :enum/attribute :notification/type}]]}
+
+{:db/ident :migration/file-part-and-task-completion-attributes
+  :txes [[{:db/ident :file.part/completed-at
+            :db/valueType :db.type/instant
+            :db/cardinality :db.cardinality/one
+            :db/doc "Timestamp of task part completion"}
+          {:db/ident :file.part/completed-by
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one
+           :db/doc "Ref to user entity who completed the task part"}
+          {:db/ident :task/completed-at
+           :db/valueType :db.type/instant
+           :db/cardinality :db.cardinality/one
+           :db/doc "Timestamp of task completion"}
+          {:db/ident :task/completed-by
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one
+           :db/doc "Ref to user entity who completed the task"}]]}
+
+ {:db/ident :migration/remove-uniqueness-from-part-id
+  :txes [[[:db/retract :thk.contract/procurement-part-id :db/unique :db.unique/identity]]]}
+
+ {:db/ident :migration/add-uniqueness-to-business-id
+  :txes [[{:db/ident :company/business-registry-code
+           :db/unique :db.unique/identity}]]}
+
+ {:db/ident :migration/cost-indexes
+  :txes [[{:db/ident :cost-index/name
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one
+           :db/doc "Cost index name"}
+          {:db/ident :cost-index/type
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one
+           :db/doc "Reference to cost index type"}
+          {:db/ident :cost-index/valid-from
+           :db/valueType :db.type/instant
+           :db/cardinality :db.cardinality/one
+           :db/doc "Valid from date"}
+          {:db/ident :cost-index/unit
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one
+           :db/doc "Unit of measurement for the index"}
+          {:db/ident :cost-index/values
+           :db/valueType :db.type/ref
+           :db/isComponent true
+           :db/cardinality :db.cardinality/many
+           :db/doc "References to cost index values"}
+
+          {:db/ident :index-value/month
+           :db/valueType :db.type/long
+           :db/cardinality :db.cardinality/one
+           :db/doc "Index value month"}
+          {:db/ident :index-value/year
+           :db/valueType :db.type/long
+           :db/cardinality :db.cardinality/one
+           :db/doc "Index value year"}
+          {:db/ident :index-value/value
+           :db/valueType :db.type/bigdec
+           :db/cardinality :db.cardinality/one
+           :db/doc "Index value"}
+
+          {:db/ident :cost-index.type/bitumen-index :enum/attribute :cost-index/type}
+          {:db/ident :cost-index.type/consumer-price-index :enum/attribute :cost-index/type}]]}
+
+ ;; TEET-1671 Import owners supervision and audit tasks and contracts from thk-teet csv to teet
+ {:db/ident :migration/import-owner-supervision-and-audit-tasks
+  :txes [[{:db/ident :task.type/owners-supervision,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/construction-quality-assurance,
+           :thk/task-type :thk.task-type/owners-supervision,
+           :filename/code "OJ"}
+
+          {:db/ident :task.type/road-safety-audit,
+           :enum/attribute :task/type,
+           :enum/valid-for :task.group/construction-approval,
+           :thk/task-type :thk.task-type/road-safety-audit,
+           :filename/code "LA"}]]}
+
+ {:db/ident :migration/subcontractor-role
+  :txes [[{:db/doc "Not selectable in UI. Added automatically to subcontractor employees"
+           :db/ident :company-contract-employee.role/subcontractor}]]}
+
+ {:db/ident :migration/add-company-phone-and-email-singular-attributes
+  :txes [[{:db/ident :company/email
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one}
+          {:db/ident :company/phone-number
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one}
+          {:db/ident :company/emails
+           :db/doc "Not in use"}
+          {:db/ident :company/phone-numbers
+           :db/doc "Not in use"}]]}
+
+ {:db/ident :migration/set-company-contract-employees-active
+  :txes [teet.migration.activate-contract-employees/mark-all-contract-company-employees-as-active]}
+
+ {:db/ident :migration/user-last-login
+  :txes [[{:db/ident :user/last-login
+           :db/valueType :db.type/instant
+           :db/cardinality :db.cardinality/one
+           :db/doc "Timestamp of users' last login to TEET"}]]}
+
+ {:db/ident :migration/migration-description-for-tx
+  :txes [[{:db/ident :migration/description
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one
+           :db/doc "Description for migration transactions"}]]}
+
+ {:db/ident :migration/set-user-last-login
+  :txes [teet.migration.user-login/set-user-last-login]}
+
+ {:db/ident :migration/add-contract-asset-group-responsibilities
+  :txes [[{:db/ident :contract-responsibility/contract
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one
+           :db/doc "Ref to Contract entity"}
+          {:db/ident :contract-responsibility/project
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one
+           :db/doc "Ref to the targeted project in the contract"}
+          {:db/ident :contract-responsibility/asset-group
+           :db/valueType :db.type/keyword
+           :db/cardinality :db.cardinality/one
+           :db/doc "Keyword specifying :db/ident of fgroup in asset db"}
+          {:db/ident :contract-responsibility/task
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one
+           :db/doc "task ref for task responsibility"}
+          {:db/ident :contract-responsibility/ta-responsible-person
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one
+           :db/doc "Ref to User"}
+          {:db/ident :contract-responsibility/supervisor
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one
+           :db/doc "Ref to company-contract-employee. Must be employee user with role Supervisor in contract that targets the construction supervision task directly"}
+          {:db/ident :contract-responsibility/company-responsible-person
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one
+           :db/doc "Ref to company-contract-employee. Must be employee in this contract"}]]}
+
+ {:db/ident :migration/key-person-files
+  :txes [[{:db/ident :company-contract-employee/attached-files
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/many
+           :db/doc "Reference to user/files that are linked to this key person"}
+          {:db/ident :user/files
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/many
+           :db/doc "Files that have been uploaded for this user via key person assignment"}]]}
+
+ {:db/ident :migration/key-person-status
+  :txes [[{:db/ident :company-contract-employee/key-person-status
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one
+           :db/doc "Reference to key person status"}
+          {:db/ident :key-person.status/assigned :enum/attribute :company-contract-employee/key-person-status}
+          {:db/ident :key-person.status/approval-requested :enum/attribute :company-contract-employee/key-person-status}
+          {:db/ident :key-person.status/approved :enum/attribute :company-contract-employee/key-person-status}
+          {:db/ident :key-person.status/rejected :enum/attribute :company-contract-employee/key-person-status}]]}
+
+ {:db/ident :migration/key-person-licenses
+  :txes [[{:db/ident :user-license/name
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one
+           :db/doc "License name"}
+          {:db/ident :user-license/expiration-date
+           :db/valueType :db.type/instant
+           :db/cardinality :db.cardinality/one
+           :db/doc "License expiration date"}
+          {:db/ident :user-license/link
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one
+           :db/doc "URL or other reference to license information"}
+
+          {:db/ident :user/licenses
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/many
+           :db/doc "User's licenses"}
+
+          {:db/ident :company-contract-employee/attached-licenses
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/many
+           :db/doc "Licenses attached to a cce"}]]}
+ {:db/ident :migration/key-person-approval-v2
+  :txes [[{:db/ident :company-contract-employee/key-person-status
+           :db/isComponent true}
+          {:db/ident :key-person/approval-comment
+           :db/valueType :db.type/string
+           :db/cardinality :db.cardinality/one
+           :db/doc "Comment explaining the approval or rejection of a key person"}
+          {:db/ident :key-person/status
+           :db/valueType :db.type/ref
+           :db/cardinality :db.cardinality/one
+           :db/doc "Reference to key person status enum"}]
+         [{:db/ident :key-person.status/assigned :enum/attribute :key-person/status}
+          {:db/ident :key-person.status/approval-requested :enum/attribute :key-person/status}
+          {:db/ident :key-person.status/approved :enum/attribute :key-person/status}
+          {:db/ident :key-person.status/rejected :enum/attribute :key-person/status}]]}
+
+ {:db/ident :migration/new-roles-for-contract-auth
+  :txes [teet.migration.contract-authorization/migrate-roles]}
+ ]

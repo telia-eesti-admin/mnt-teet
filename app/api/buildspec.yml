@@ -1,0 +1,35 @@
+version: 0.2
+
+env:
+  variables:
+    WD: "app/api"
+    IMAGE_REPO_NAME: "teet-api"
+    IMAGE_TAG: "latest"
+    ECS_TASK_NAME: "teet-api"
+    AWS_DEFAULT_REGION: "eu-central-1"
+
+  parameter-store:
+    AWS_ACCOUNT_ID: "/teet/aws-account-id"
+    DOCKER_USER: "/teet/docker/user"
+    DOCKER_ACCESS_TOKEN: "/teet/docker/token"
+
+phases:
+  install:
+    runtime-versions:
+      java: corretto11
+  pre_build:
+    commands:
+      - echo $DOCKER_ACCESS_TOKEN > ~/token.txt
+      - cat ~/token.txt | docker login --username $DOCKER_USER --password-stdin
+  build:
+    commands:
+      - cd $WD && bash build.sh
+      - docker tag mnt-teet/teet-api:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/teet-api:latest
+      - $(aws ecr get-login-password --no-include-email --region eu-central-1)
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/teet-api:latest
+  post_build:
+   commands:
+     - cd ../..
+     - printf '[{"name":"%s","imageUri":"%s"}]' $ECS_TASK_NAME $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG > api.imagedefinitions.json
+artifacts:
+   files: api.imagedefinitions.json

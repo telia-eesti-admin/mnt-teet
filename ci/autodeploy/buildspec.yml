@@ -1,0 +1,22 @@
+version: 0.2
+
+env:
+  variables:
+    JAVA_HOME: "/usr/lib/jvm/java-8-openjdk-amd64"
+
+phases:
+  install:
+    runtime-versions:
+      java: corretto11
+    commands:
+      - curl -s https://raw.githubusercontent.com/borkdude/babashka/master/install -o install-babashka
+      - chmod +x install-babashka
+      - ./install-babashka
+  build:
+    commands:
+      - ./ci/scripts/build-and-deploy.bash
+      - sleep 60
+      - ./ci/scripts/codebuild teet-browser-tests $CODEBUILD_RESOLVED_SOURCE_VERSION &
+      - ./ci/scripts/codebuild teet-drift-detect $CODEBUILD_RESOLVED_SOURCE_VERSION &
+      - ./ci/scripts/codebuild teet-analytics-config-sync $CODEBUILD_RESOLVED_SOURCE_VERSION &
+      - sleep 5

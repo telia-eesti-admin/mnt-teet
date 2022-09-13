@@ -1,0 +1,115 @@
+{:deps {http-kit {:mvn/version "2.5.3"}
+        ;; Need clj-http for vektorio file uploads
+        clj-http/clj-http {:mvn/version "3.12.0"}
+        ring/ring-jetty-adapter {:mvn/version "1.9.3"}
+        compojure {:mvn/version "1.6.1"}
+        hiccup {:mvn/version "1.0.5"}
+        com.taoensso/timbre {:mvn/version "4.10.0"}
+        clj-time {:mvn/version "0.15.2"}
+
+        ;; Data formats
+        cheshire {:mvn/version "5.9.0"}
+        org.clojure/data.csv {:mvn/version "0.1.4"}
+        com.cognitect/transit-clj {:mvn/version "0.8.313"}
+        org.clojure/data.zip {:mvn/version "0.1.3"}
+        dk.ative/docjure {:mvn/version "1.13.0"}
+        net.coobird/thumbnailator {:mvn/version "0.4.13"}
+
+        ;; FOP 2.5 needs jai-codec not available in central, use 2.3
+        org.apache.xmlgraphics/fop {:mvn/version "2.3"}
+        com.vladsch.flexmark/flexmark {:mvn/version "0.62.2"}
+
+        ;; Send RFC822-compliant email
+        com.draines/postal {:mvn/version "2.0.4"}
+
+        ;; JWT and JWK
+        com.nimbusds/nimbus-jose-jwt {:mvn/version "7.9" ;; oct 2019
+                                      :exclusions [net.minidev/json-smart]}
+        net.minidev/json-smart {:mvn/version "2.3"}
+
+        ;; Datomic libraries
+
+        ;; NOTE This is also a dependency on the frontend side to help
+        ;; with cljc reloading. Bump that version as well.
+        com.datomic/client-cloud {:mvn/version "0.8.102"}
+        com.datomic/ion {:mvn/version "0.9.48"}
+
+        commons-io/commons-io {:mvn/version "2.6"}
+
+        ;; Cognitect AWS API
+        com.cognitect.aws/api {:mvn/version "0.8.456"}
+        com.cognitect.aws/endpoints {:mvn/version "1.1.11.789"}
+        com.cognitect.aws/email {:mvn/version "770.2.568.0"}
+        com.cognitect.aws/ssm {:mvn/version "798.2.672.0"}
+        com.cognitect.aws/s3 {:mvn/version "799.2.682.0"}
+        com.cognitect.aws/sts {:mvn/version "798.2.678.0"}
+        com.cognitect.aws/logs {:mvn/version "798.2.672.0"}
+
+
+        ;; PostgreSQL JDBC driver and SQL libraries
+        org.postgresql/postgresql {:mvn/version "42.2.20"}
+        com.zaxxer/HikariCP {:mvn/version "4.0.3"}
+        webjure/jeesql {:mvn/version "0.4.7"}
+        }
+
+
+
+ :mvn/repos {"central" {:url "https://repo1.maven.org/maven2/"}
+             ;;"teet-dev-files" {:url "s3://teet-dev-files/maven"}
+             "datomic-cloud" {:url "s3://datomic-releases-1fc2183a/maven/releases"}
+             "cognitect-dev-tools" {:url "https://dev-tools.cognitect.com/maven/releases/"}}
+ :paths ["src/clj"
+         "resources"
+         "common/src/cljc"
+         "common/src/clj"
+         "common/resources"]
+
+ :aliases {:ion {:extra-deps {com.datomic/ion-dev {:mvn/version "0.9.276"}}}
+           :dev {:jvm-opts ["-Duser.timezone=UTC"] ;; Match AWS env
+                 :extra-deps {com.datomic/ion-dev {:mvn/version "0.9.276"}
+                              org.clojure/tools.namespace {:mvn/version "0.3.1"}
+                              com.datomic/dev-local {:mvn/version "0.9.232"}}
+                 :extra-paths ["dev-src" "test"]}
+           :db-connect {:extra-deps {com.datomic/ion-dev {:mvn/version "0.9.276"}
+                                     org.clojure/tools.namespace {:mvn/version "0.3.1"}
+                                     com.datomic/dev-local {:mvn/version "0.9.232"}}
+                        :extra-paths ["dev-src" "test"]}
+
+           :rebl {:extra-deps {com.cognitect/rebl {:mvn/version "0.9.240"}
+                               org.openjfx/javafx-fxml {:mvn/version "15-ea+6"}
+                               org.openjfx/javafx-controls {:mvn/version "15-ea+6"}
+                               org.openjfx/javafx-swing {:mvn/version "15-ea+6"}
+                               org.openjfx/javafx-base {:mvn/version "15-ea+6"}
+                               org.openjfx/javafx-web {:mvn/version "15-ea+6"}}}
+           :pack {:extra-deps {pack/pack.alpha {:git/url "https://github.com/juxt/pack.alpha.git"
+                                                :sha "2769a6224bfb938e777906ea311b3daf7d2220f5"}}}
+           :test {:main-opts ["-m" "kaocha.runner" "--skip-meta" "db"]
+                  :jvm-opts ["-Duser.timezone=UTC"] ;; Match AWS env
+                  :extra-deps {lambdaisland/kaocha {:mvn/version "0.0-529"}}
+                  :extra-paths ["test"]}
+
+           :run-browser-test {:jvm-opts ["-Duser.timezone=UTC"] ;; Match AWS env
+                              :extra-deps {com.datomic/ion-dev {:mvn/version "0.9.276"}
+                                           org.clojure/tools.namespace {:mvn/version "0.3.1"}
+                                           com.datomic/dev-local {:mvn/version "0.9.232"}}
+                              :extra-paths ["dev-src" "test"]
+                              :main-opts ["-m" "teet.browser-test" "../../ci/browser-tests/browser-test-config.edn"]}
+
+           :ci-test {:jvm-opts ["-Duser.timezone=UTC"] ;; Match AWS env
+                     :main-opts ["-m" "kaocha.runner"
+                                 "--no-color" ;; No ANSI codes in CI
+                                 "--reporter" "teet.test.slack/report"]
+                     :extra-deps {lambdaisland/kaocha {:mvn/version "1.0-612"}
+                                  com.datomic/dev-local {:mvn/version "0.9.232"}}
+                     :extra-paths ["test"]}
+           :test-all {:jvm-opts ["-Duser.timezone=UTC"] ;; Match AWS env
+                      :main-opts ["-m" "kaocha.runner"]
+                      :extra-deps {lambdaisland/kaocha {:mvn/version "1.0-612"}
+                                   com.datomic/dev-local {:mvn/version "0.9.232"}}
+                      :extra-paths ["test"]}
+           :authorizations {:main-opts ["-m" "teet.authorization"]
+                            :extra-paths ["src/build"]
+                            :extra-deps {:dk.ative/docjure {:mvn/version "1.12.0"}}}
+           :clj-nvd {:extra-deps {clj-nvd {:git/url "https://github.com/miikka/clj-nvd.git"
+                                           :sha "a6fd635e2f9bc61e786d7182fa68f1e19598e325"}}
+                     :main-opts ["-m" "clj-nvd.core"]}}}

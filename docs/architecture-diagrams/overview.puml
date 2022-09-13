@@ -1,0 +1,131 @@
+@startuml TEET overview
+
+title
+	TEET system architecture overview
+end title
+
+
+!define AWSPuml https://raw.githubusercontent.com/awslabs/aws-icons-for-plantuml/master/dist
+!includeurl AWSPuml/AWSCommon.puml
+!includeurl AWSPuml/EndUserComputing/all.puml
+!includeurl AWSPuml/Mobile/APIGateway.puml
+!includeurl AWSPuml/Compute/Lambda.puml
+!includeurl AWSPuml/Compute/Fargate.puml
+!includeurl AWSPuml/Database/Aurora.puml
+!includeurl AWSPuml/Storage/SimpleStorageServiceS3.puml
+!includeurl AWSPuml/Compute/EC2.puml
+
+actor "TEET Browser app (frontend)" as personAlias
+(User prepared documents) as documentsAlias
+Aurora(pgAlias, "PostgreSQL DB", "Geo data")
+
+
+package "External systems" {
+        (THK system) as thkAlias
+        (Maa-amet maps) as mapsAlias
+        (Maa-amet restrictions) as restrictionsAlias
+        (Cadastral data) as cadastraldbAlias
+        (TARA login) as taraAlias
+        cloud "X-road" {
+  [Maanteeamet Security Server] as xroad
+  database "Property registry" as propertyRegistry
+                database "Business registry" as businessRegistry
+                note bottom of xroad
+        TEET accesses X-road services via VPN and through Maanteeamet security server.
+
+        TEET does not offer any services through X-road, only acts as a client to fetch information from registries.
+end note
+
+}
+
+        note bottom of mapsAlias
+	Front end requests map tiles from Maa-amet tile server
+end note
+
+  (Tableau analytics) as tableauAlias
+
+  (Vektor.io) as vektorio
+}
+
+
+mapsAlias <-- personAlias
+
+
+
+Fargate(pgRestAlias, "PostgREST API", "HTTP access to PostgreSQL")
+SimpleStorageServiceS3(storageAlias, "Stored docs", "Project-related uploaded files")
+SimpleStorageServiceS3(integrationS3Alias, "THK integration data", "CSV files")
+APIGateway(apigwAlias, "Frontend APIGW", "Web UI actions")
+SimpleStorageServiceS3(frontendBucket, "Frontend assets", "HTML, CSS and compiled JS")
+
+(TEET Geo data import tool) as importToolAlias
+importToolAlias --> restrictionsAlias
+importToolAlias --> cadastraldbAlias
+importToolAlias --> pgRestAlias
+
+
+package "Datomic" {
+  (Datomic DB) as datomicAlias
+  Lambda(queryIonAlias, "Query ion", "Read back information")
+  Lambda(commandIonAlias, "Command ion", "Alter system state")
+  Lambda(thkIntegrationIonAlias, "THK Integration ion", "Processes CSV files")
+  Lambda(uploadProcessingIonAlias, "Upload processing ion", "uploaded files")
+  Lambda(taraLoginIon, "TARA login", "OpenID Connect")
+  EC2(datomicComputeNode, "Compute node", "Handles actual query and business logic")
+
+  note right of datomicComputeNode
+	Datomic Cloud runs a set of compute nodes,
+	each Datomic Ion has an associated Lambda which proxies requests to the compute nodes
+  end note
+
+  note left of datomicAlias
+	Datomic DB data is backed by AWS DynamoDB, S3 & EBS services
+  end note
+
+  EC2(datomicBastion,"Bastion/analytics", "Handles Presto analytics connector")
+
+}
+
+datomicComputeNode <--> datomicAlias
+personAlias --> taraAlias
+personAlias --> apigwAlias
+apigwAlias --> frontendBucket
+apigwAlias --> storageAlias
+apigwAlias --> queryIonAlias
+apigwAlias --> commandIonAlias
+apigwAlias --> taraLoginIon
+personAlias --> documentsAlias
+documentsAlias --> storageAlias
+integrationS3Alias <--> thkIntegrationIonAlias
+thkAlias --> integrationS3Alias
+
+thkIntegrationIonAlias <--> datomicComputeNode
+queryIonAlias <--> datomicComputeNode
+commandIonAlias <--> datomicComputeNode
+uploadProcessingIonAlias <--> datomicComputeNode
+taraLoginIon <--> datomicComputeNode
+
+datomicComputeNode --> pgAlias
+
+tableauAlias --> datomicBastion
+datomicBastion --> datomicComputeNode
+
+taraLoginIon --> taraAlias
+Datomic -u-> pgRestAlias
+uploadProcessingIonAlias <--> storageAlias
+
+pgRestAlias --> pgAlias
+personAlias --> pgRestAlias
+
+note left of integrationS3Alias
+	THK system periodically uploads CSV file to S3 integration bucket
+end note
+
+datomicComputeNode --> vektorio
+
+datomicComputeNode --> xroad :VPN connection
+xroad --> propertyRegistry
+xroad --> businessRegistry
+
+
+@enduml

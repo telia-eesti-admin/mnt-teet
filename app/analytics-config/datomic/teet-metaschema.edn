@@ -1,0 +1,82 @@
+{:tables
+ {:user/id {:include [:user/*]}
+  :comment/comment {:include [:comment/*]}
+  :thk.project/id {:name "project"
+                   :include [:thk.project/*]
+                   :exclude [:thk.project/integration-info]
+                   :rename-many-table {:thk.project/lifecycles "project_x_lifecycles"
+                                       :thk.project/related-cadastral-units "project_x_cadastral_units"
+                                       :thk.project/related-restrictions "project_x_restrictions"}}
+  :thk.lifecycle/id {:name "lifecycle"
+                     :include [:thk.lifecycle/*]
+                     :exclude [:thk.lifecycle/integration-info]
+                     :rename-many-table {:thk.lifecycle/activities "lifecycle_x_activities"}}
+  :activity/name {:include [:activity/*]
+                  :exclude [:activity/integration-info]}
+  :task/type {:include [:task/*]}
+  :file/name {:include [:file/*]}
+  :permission/role {:include [:permission/*]}
+  :enum/attribute {:name "code"
+                   :include [:db/ident]
+                   :exclude [:enum/attribute :enum/valid-for]
+                   :rename {:db/ident "code"}}
+  ;; cooperation
+  :cooperation.3rd-party/name
+  {:name "cooperation_3rd_party"
+   :include [:cooperation.3rd-party/*]}
+
+  :cooperation.application/type
+  {:name "cooperation_application"
+   :include [:cooperation.application/*]}
+
+  :cooperation.response/status
+  {:name "cooperation_response"
+   :include [:cooperation.response/*]}
+
+  :cooperation.opinion/status
+  {:name "cooperation_opinion"
+   :include [:cooperation.opinion/*]}
+
+  ;; meetings
+  :meeting/title {:name "meeting"
+                  :include [:meeting/*]}
+
+  :meeting.agenda/topic {:name "meeting_agenda"
+                         :include [:meeting.agenda/*]}
+
+  :meeting.decision/body {:name "meeting_decision"
+                          :include [:meeting.decision/*]}
+
+  ;; contracts
+  :thk.contract/procurement-id+procurement-part-id {:name "contracts"
+                                                    :include [:thk.contract/*]}
+
+  :company-contract/company {:name "company_contract"}
+  :company-contract-employee/user {:name "company_contract_employee"}
+
+  :user-license/name {:name "userlicense"
+                      :include [:user-license/*]}
+  }
+
+ ;; Joins are not needed, but make the tables "wide" for
+ ;; analytics tools. They include the referenced entity
+ ;; attributes in the referring row output.
+ :joins {:activity/tasks "task"
+         :meta/creator "user"
+         :meta/modifier "user"
+         :activity/manager "user"
+         :thk.project/owner "user"
+         :task/assignee "user"
+         :meeting/organizer "user"
+
+         ;; Include all the enum refs as joins to get the enum keyword
+         ;; value in the referring row. Table for enums is "code".
+         :task/type "code"
+         :activity/name "code"
+         :comment/visibility "code"
+         :file/status "code"
+         :task/group "code"
+         :thk.lifecycle/type "code"
+         :activity/status "code"
+         :comment/status "code"
+         :task/status "code"}}

@@ -1,0 +1,23 @@
+To run against local dev, you can use the cypress app normally, for example this way
+
+CYPRESS_SITE_PASSWORD=<password here> npx cypress run --config-file cypress-localdev.json
+
+or use the run-in-docker.sh script.
+
+The docker script will also pass any args to cypress so you can eg use:
+
+  ./run-in-docker.sh --spec cypress/integration/login.spec.js # this runs just one spec
+
+# Smoke tests vs CI tests
+
+Some tests require elaborate setup and use controller only available in CI
+environment to do setup.
+
+Setup may include creating new projects/tasks that can't be used in an
+environment that has integrations.
+
+Tests ending with ".ci.spec.js" should only be run in CI or local test runs.
+Other tests can be run in real cloud deployed environment.
+
+There exists three different config files for running cypress: "cypress-ci" is used to run in Github actions,
+"cypress-localdev.json" is used to run in a locally run environment and "cypress.json" is used to run against the dev env.

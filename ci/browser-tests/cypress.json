@@ -1,0 +1,10 @@
+{"baseUrl": "https://dev-teet.solitacloud.fi/",
+ "reporter": "cypress-multi-reporters",
+ "reporterOptions": {
+     "configFile": "reporterOpts.json"
+ },
+ "ignoreTestFiles": "**/*.ci.spec.js",
+ "viewportWidth": 1280,
+ "viewportHeight": 800,
+ "retries": 5
+}

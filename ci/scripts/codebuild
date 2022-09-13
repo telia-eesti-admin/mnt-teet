@@ -1,0 +1,125 @@
+#!/usr/bin/env bb
+
+(require '[cheshire.core :as cheshire])
+(require '[clojure.java.shell :refer [sh]])
+(require '[clojure.string :as str])
+
+(defn json-out [shell-result]
+  (if (pos? (:exit shell-result))
+    (throw (ex-info (str "shell command failed, stdout: " (:out shell-result) ", stderr: " (:err shell-result))
+                    shell-result))
+    (-> shell-result
+      :out
+      (cheshire/decode keyword))))
+
+
+
+(defn start-build [project version]
+  (println "Starting CodeBuild for" project "with source version" version)
+  (-> (sh "aws" "codebuild" "start-build"
+          "--project-name" project
+          "--source-version" version)
+      json-out
+      (get-in [:build :id])))
+
+(defn retry [func retries wait-label]
+  (let [[result ex] (try
+                      [(func) nil]
+                      (catch Throwable t
+                        [nil t]))]
+    (if ex
+      (if (pos? retries)
+        (do
+          (println wait-label)
+          (Thread/sleep 2000)
+          (recur func (dec retries) wait-label))
+        (throw ex))
+      result)))
+
+(defn get-build-info [build-id]
+  (let [{:keys [builds buildsNotFound]}
+        (-> (sh "aws" "codebuild" "batch-get-builds" "--ids" build-id)
+            json-out)]
+    (if (seq buildsNotFound)
+      (throw (ex-info "Build not found" {:build-id build-id}))
+      (first builds))))
+
+(defn get-log-info
+  "Returns cloudwatch group and stream name for build logs"
+  [build-id]
+  (retry
+   #(let [{logs :logs} (get-build-info build-id)
+          {:keys [groupName streamName]} logs]
+      (if (and (string? groupName)
+               (string? streamName))
+        [groupName streamName]
+        (throw (ex-info "Logs not available yet"
+                        {:groupName groupName
+                         :streamName streamName}))))
+   30
+   "waiting for logs to be available"))
+
+(defn tail-build-logs
+  ([log-info]
+   (tail-build-logs log-info nil))
+  ([log-info since-timestamp]
+   (let [[group stream] log-info
+         logs
+         (->> (sh "aws" "logs" "get-log-events"
+                  "--log-group-name" group
+                  "--log-stream-name" stream
+                  "--start-time" (str (inc (or since-timestamp 0))))
+              json-out
+              :events
+              (mapv (juxt :timestamp :message)))]
+     (with-meta (mapv second logs)
+       {:last-timestamp (if (seq logs)
+                          (reduce max (map first logs))
+                          (or since-timestamp 0))}))))
+
+(defn print-logs [project-name lines]
+  (doseq [line lines]
+    ;; Move to beginning of line and clear the line... then print the message
+    (print "\u001b[1000D\u001b[2K" (str "[" project-name "] ") line))
+  (flush))
+
+(defn wait-for-completion [project-name version build-id]
+  (let [start-time (System/currentTimeMillis)
+        elapsed #(int (/ (- (System/currentTimeMillis) start-time) 1000))
+        log-info (get-log-info build-id)
+        poll (fn [last-timestamp]
+               (Thread/sleep 2000)
+               (let [logs (tail-build-logs log-info last-timestamp)
+                     info (get-build-info build-id)]
+                 (when (seq logs)
+                   (print-logs project-name logs))
+                 (assoc info :last-log-timestamp (or (-> logs meta :last-timestamp)
+                                                     last-timestamp))))]
+    (loop [{:keys [buildComplete currentPhase last-log-timestamp] :as build-info}
+           (poll nil)
+           [s & spinner] (cycle ["|" "/" "-" "\\"])]
+      (if buildComplete
+        build-info
+        (do
+          (print "\u001b[1000D\u001b[2K\u001b[7m"
+                 (str "[" project-name "@" version "] (" (elapsed) "s) ")
+                 s " " currentPhase "\u001b[0m")
+          (flush)
+          (recur (poll last-log-timestamp) spinner))))))
+
+(defn notify [project status]
+  (let [params (str "display notification \"" status "\" with title \"" project "\"")]
+    (try
+      (sh "osascript" "-e" params)
+      (catch Exception e
+        (println "osascript notification failed")))))
+
+
+(let [[project version & _] *command-line-args*
+      version (or version "master")
+      build-id (start-build project version)]
+  (println "Build ID: " build-id)
+  (let [{status :buildStatus} (wait-for-completion project version build-id)]
+    (println "Finished build: " build-id " => " status)
+    (notify project status)
+    (System/exit (if (= "SUCCEEDED" status) 0 1))))

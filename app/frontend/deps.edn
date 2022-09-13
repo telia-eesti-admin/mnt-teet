@@ -1,0 +1,63 @@
+{:deps {org.clojure/clojurescript {:mvn/version "1.10.773"}
+        ;; UI Libraries
+        reagent {:mvn/version "1.0.0-alpha2" :exclusions [cljsjs/react
+                                                          cljsjs/react-dom
+                                                          cljsjs/react-dom-server]}
+        tatut/postgrest-ui {:git/url "https://github.com/tatut/postgrest-ui"
+                            :sha "a6a38d14433ec793c6d9df0a288d8501073eabe7"
+                            :exclusions [cljsjs/react
+                                         cljsjs/react-dom]}
+        webjure/tuck {:git/url "https://github.com/tatut/tuck"
+                      :sha "f053d3ac50bc623cbd44397cea2387a28c0cf82e"}
+        data-frisk-reagent {:mvn/version "0.4.5" :exclusions [reagent]}
+        herb {:mvn/version "0.10.1-SNAPSHOT"}
+        tatut/re-svg-icons {:git/url "https://github.com/tatut/re-svg-icons"
+                            :sha "bc236886fc81b186888226bb161dcd279db2bee0"}
+
+        ;; Routing
+        funcool/bide {:mvn/version "1.6.0"}
+
+        ;; Logging
+        com.taoensso/timbre {:mvn/version "4.10.0"}
+
+        ;; Mapping and geometry libraries
+        cljsjs/openlayers {:mvn/version "4.4.1-1"}
+        ;cljsjs/proj4 {:mvn/version "2.5.0-0"}
+
+        ;; cljs-time
+        com.andrewmcveigh/cljs-time {:mvn/version "0.5.2"}
+
+        ;; Utils
+        cljs-bean {:mvn/version "1.4.0"}
+        org.clojure/core.async {:mvn/version "0.6.532"}
+        alandipert/storage-atom {:mvn/version "2.0.1"}
+
+        com.cognitect/transit-cljs {:mvn/version "0.8.256"}}
+ :paths ["src/cljs" "../common/src/cljc" "target" "resources"]
+ :aliases {:testbuild {:main-opts ["-m" "cljs.main"
+                                   "-co" "test-build.edn"
+                                   "-O" "advanced" "-v" "-c"]
+                       :extra-deps {webjure/drtest {:git/url "https://github.com/tatut/drtest"
+                                                    :sha "97d4f72d97eb0d68e4fa08709ee511af4c96e16a"}}
+                       :extra-paths ["test"]}
+           :testrun {:main-opts ["-m" "teet.test"]
+                     :extra-deps {clj-chrome-devtools {:git/url "https://github.com/tatut/clj-chrome-devtools"
+                                                       :sha "1ffc1a52804517dfb7e15ef78b34348a763db2d1"}}
+                     :extra-paths ["test"]}
+
+           :browser-test-build {:main-opts ["-m" "figwheel.main" "-co" "browser-test.cljs.edn" "-c"]
+                                ;:main-opts ["-m" "cljs.main" "-co" "dev-build.edn" "-v" "-c" "-r"]
+                                :extra-deps {com.bhauman/figwheel-main {:mvn/version "0.2.11"}
+                                             webjure/drtest {:git/url "https://github.com/tatut/drtest"
+                                                             :sha "97d4f72d97eb0d68e4fa08709ee511af4c96e16a"}
+                                             com.datomic/client-cloud {:mvn/version "0.8.102"}}
+                                :extra-paths ["test"]}
+
+           :dev {:main-opts ["-m" "figwheel.main" "-b" "dev" "-r"]
+                 ;:main-opts ["-m" "cljs.main" "-co" "dev-build.edn" "-v" "-c" "-r"]
+                 :extra-deps {com.bhauman/figwheel-main {:mvn/version "0.2.11"}
+                              webjure/drtest {:git/url "https://github.com/tatut/drtest"
+                                              :sha "97d4f72d97eb0d68e4fa08709ee511af4c96e16a"}
+                              com.datomic/client-cloud {:mvn/version "0.8.102"}}
+                 :extra-paths ["test"]}
+           :prod {:main-opts ["-m" "cljs.main" "-co" "prod-build.edn" "-O" "advanced" "-v" "-c"]}}}

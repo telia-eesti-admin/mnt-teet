@@ -1,0 +1,32 @@
+version: 0.2
+
+env:
+  variables:
+    JAVA_HOME: "/usr/lib/jvm/java-8-openjdk-amd64"
+    FRONTEND: "app/frontend"
+    CHROMIUM_BROWSER: "/opt/google/chrome/chrome"
+  parameter-store:
+    TEET_ENV: "/teet/env"
+
+phases:
+  install:
+    runtime-versions:
+      java: corretto11
+    commands:
+      - echo Download Clojure CLI tool
+      - curl -O https://download.clojure.org/install/linux-install-1.10.1.466.sh
+      - bash linux-install-1.10.1.466.sh
+  build:
+    commands:
+      - echo Building frontend ClojureScript app
+      - cd $FRONTEND
+      - npm install
+      # - bash run-tests.sh # unsolved failure in codebuild, works in GitHub actions and locally
+      - bash build.sh
+      - bash resources.sh
+artifacts:
+   files:
+     - frontend-*.zip
+cache:
+  paths:
+    - '/root/.m2/**/*'
