@@ -19,13 +19,14 @@ phases:
       java: corretto11
   pre_build:
     commands:
+      - $(aws ecr get-login-password --region eu-central-1)
       - echo $DOCKER_ACCESS_TOKEN > ~/token.txt
       - cat ~/token.txt | docker login --username $DOCKER_USER --password-stdin
   build:
     commands:
       - cd $WD && bash build.sh
       - docker tag mnt-teet/teet-api:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/teet-api:latest
-      # - aws ecr get-login-password --region eu-central-1 | docker login --username $DOCKER_USER --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+      - $(aws ecr get-login-password --region eu-central-1)
       - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/teet-api:latest
   post_build:
    commands:
