@@ -19,9 +19,8 @@ phases:
       java: corretto11
   pre_build:
     commands:
-      - $(aws ecr get-login-password --region eu-central-1)
-      # - echo $DOCKER_ACCESS_TOKEN > ~/token.txt
-      # - cat ~/token.txt | docker login --username $DOCKER_USER --password-stdin
+      - echo $DOCKER_ACCESS_TOKEN > ~/token.txt
+      - cat ~/token.txt | docker login --username $DOCKER_USER --password-stdin
   build:
     commands:
       - cd $WD && bash build.sh
